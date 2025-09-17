@@ -1,18 +1,18 @@
 CREATE TABLE loans (
     id UUID PRIMARY KEY,
-    borrower_id VARCHAR(255) NOT NULL,
-    principal_amount NUMERIC(15, 2) NOT NULL,
-    rate NUMERIC(5, 2) NOT NULL,
-    roi NUMERIC(5, 2) NOT NULL,
-    state VARCHAR(50) NOT NULL,
-    agreement_letter_url VARCHAR(255),
+    borrower_id UUID NOT NULL,
+    principal_amount float8 NOT NULL,
+    rate float4 NOT NULL,
+    roi float4 NOT NULL,
+    state VARCHAR NOT NULL,
+    agreement_letter_url VARCHAR,
 
-    validator_employee_id VARCHAR(255),
-    visit_proof_picture_url VARCHAR(255),
+    validator_employee_id VARCHAR,
+    visit_proof_picture_url VARCHAR,
     approval_date TIMESTAMPTZ,
 
-    officer_employee_id VARCHAR(255),
-    signed_agreement_url VARCHAR(255),
+    officer_employee_id VARCHAR,
+    signed_agreement_url VARCHAR,
     disbursement_date TIMESTAMPTZ,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

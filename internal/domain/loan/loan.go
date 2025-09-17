@@ -4,16 +4,17 @@ import (
 	"time"
 
 	"github.com/BagusAK95/amarta_test/internal/domain/common/model"
+	"github.com/google/uuid"
 )
 
 type Loan struct {
 	model.BaseModel
-	BorrowerID         string  `json:"borrower_id"`
-	PrincipalAmount    float64 `json:"principal_amount"`
-	Rate               float64 `json:"rate"`
-	ROI                float64 `json:"roi"`
-	State              State   `json:"state"`
-	AgreementLetterURL string  `json:"agreement_letter_url"`
+	BorrowerID         uuid.UUID `json:"borrower_id"`
+	PrincipalAmount    float64   `json:"principal_amount"`
+	Rate               float32   `json:"rate"`
+	ROI                float32   `json:"roi"`
+	State              State     `json:"state"`
+	AgreementLetterURL string    `json:"agreement_letter_url"`
 
 	ApprovalDetails     ApprovalDetails     `json:"approval_details" gorm:"embedded"`
 	DisbursementDetails DisbursementDetails `json:"disbursement_details" gorm:"embedded"`

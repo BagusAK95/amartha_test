@@ -4,22 +4,17 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependency directories (remove the comment below to include it)
+# Dependency directories
 vendor
 
 # Config file
 .env
-.env_dev
-.env_stg
-.env_prod
-config.json
 
 # VSCode
 .vscode
 
 # DS Store
 .DS_Store
-.scannerwork
 
 # binary
-amarta_test
+amartha_test

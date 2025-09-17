@@ -1,6 +1,10 @@
 package loan
 
-import "context"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type ILoanUsecase interface {
 	CreateLoan(context.Context, CreateLoanRequest) (*Loan, error)
@@ -8,9 +12,9 @@ type ILoanUsecase interface {
 
 // TODO: Move to DTO folder
 type CreateLoanRequest struct {
-	BorrowerID         string  `json:"borrower_id" binding:"required"`
-	PrincipalAmount    float64 `json:"principal_amount" binding:"required"`
-	Rate               float64 `json:"rate" binding:"required"`
-	ROI                float64 `json:"roi" binding:"required"`
-	AgreementLetterURL string  `json:"agreement_letter_url" binding:"required"`
+	BorrowerID         uuid.UUID `json:"borrower_id" binding:"required"`
+	PrincipalAmount    float64   `json:"principal_amount" binding:"required"`
+	Rate               float32   `json:"rate" binding:"required"`
+	ROI                float32   `json:"roi" binding:"required"`
+	AgreementLetterURL string    `json:"agreement_letter_url" binding:"required"`
 }

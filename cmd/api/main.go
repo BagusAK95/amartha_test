@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 
+	borrowerrepo "github.com/BagusAK95/amarta_test/internal/application/borrower/repository"
 	loanrepo "github.com/BagusAK95/amarta_test/internal/application/loan/repository"
 	loanuc "github.com/BagusAK95/amarta_test/internal/application/loan/usecase"
 	"github.com/BagusAK95/amarta_test/internal/config"
 	"github.com/BagusAK95/amarta_test/internal/infrastructure/database"
-	"github.com/BagusAK95/amarta_test/internal/presentation/rest"
+	"github.com/BagusAK95/amarta_test/internal/presentation/rest/router"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,14 +25,15 @@ func main() {
 	dbConn := database.OpenConnection(cfg.Postgres, dbConfig)
 
 	// Initialize repository
+	borrowerRepo := borrowerrepo.NewBorrowerRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 	loanRepo := loanrepo.NewLoanRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 
 	// Initialize usecase
-	loanUsecase := loanuc.NewLoanUsecase(loanRepo)
+	loanUsecase := loanuc.NewLoanUsecase(loanRepo, borrowerRepo)
 
 	// Start server
 	gin.SetMode(gin.ReleaseMode)
-	r := rest.NewRouter(loanUsecase)
+	r := router.NewRouter(loanUsecase)
 
 	serverAddr := fmt.Sprintf(":%d", cfg.Application.Port)
 	log.Printf("🚀 Starting server on %s", serverAddr)

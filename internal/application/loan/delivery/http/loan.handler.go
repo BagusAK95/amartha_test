@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
+	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,13 +21,13 @@ func NewLoanHandler(usecase loan.ILoanUsecase) *loanHandler {
 func (h *loanHandler) CreateLoan(c *gin.Context) {
 	var body loan.CreateLoanRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		_ = c.Error(httpError.NewBadRequestError(err.Error()))
 		return
 	}
 
 	loan, err := h.usecase.CreateLoan(c.Request.Context(), body)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
 

@@ -1,13 +1,15 @@
-package rest
+package router
 
 import (
 	loanhttp "github.com/BagusAK95/amarta_test/internal/application/loan/delivery/http"
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
+	"github.com/BagusAK95/amarta_test/internal/presentation/rest/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func NewRouter(loanUsecase loan.ILoanUsecase) *gin.Engine {
 	router := gin.Default()
+	router.Use(middleware.ErrorHandler())
 
 	handler := loanhttp.NewLoanHandler(loanUsecase)
 
