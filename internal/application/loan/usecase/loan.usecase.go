@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/BagusAK95/amarta_test/internal/domain/borrower"
+	"github.com/BagusAK95/amarta_test/internal/domain/common/repository"
 	"github.com/BagusAK95/amarta_test/internal/domain/employee"
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
@@ -97,4 +98,29 @@ func (u *loanUsecase) ApproveLoan(ctx context.Context, loanID uuid.UUID, req loa
 	}
 
 	return &updatedLoan, nil
+}
+
+func (u *loanUsecase) DetailLoan(ctx context.Context, loanID uuid.UUID) (*loan.Loan, error) {
+	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
+	if err != nil {
+		return nil, err
+	} else if validLoan.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("loan not found")
+	}
+
+	return &validLoan, nil
+}
+
+func (u *loanUsecase) ListLoan(ctx context.Context, state *string, page int, limit int) (repository.Pagination[loan.Loan], error) {
+	filter := map[string]any{}
+	if state != nil {
+		filter["state"] = *state
+	}
+
+	loans, err := u.loanRepo.Pagination(ctx, filter, page, limit)
+	if err != nil {
+		return repository.Pagination[loan.Loan]{}, err
+	}
+
+	return loans, nil
 }

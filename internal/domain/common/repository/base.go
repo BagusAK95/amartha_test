@@ -14,6 +14,7 @@ type IBaseRepo[M model.EntityModel] interface {
 	GetAll(ctx context.Context) ([]M, error)
 	GetByID(ctx context.Context, ID uuid.UUID) (M, error)
 	GetByIDs(ctx context.Context, IDs []uuid.UUID) ([]M, error)
+	Pagination(ctx context.Context, filter map[string]any, page int, limit int) (res Pagination[M], err error)
 	Create(ctx context.Context, model M) (M, error)
 	CreateBulk(ctx context.Context, models []M) error
 	Update(ctx context.Context, ID uuid.UUID, model M) (M, error)
@@ -32,6 +33,12 @@ type IBaseRepo[M model.EntityModel] interface {
 	BeginTransaction(ctx context.Context) *gorm.DB
 	Rollback(trx *gorm.DB) *gorm.DB
 	Commit(trx *gorm.DB) *gorm.DB
+}
+
+type Pagination[M model.EntityModel] struct {
+	Data    []M  `json:"data"`
+	HasNext bool `json:"has_next"`
+	HasPrev bool `json:"has_prev"`
 }
 
 type BaseRepo[M model.EntityModel] struct {
@@ -89,6 +96,42 @@ func (r *BaseRepo[M]) GetByIDs(ctx context.Context, IDs []uuid.UUID) (models []M
 	}
 
 	return models, nil
+}
+
+func (r *BaseRepo[M]) Pagination(ctx context.Context, filter map[string]any, page int, limit int) (res Pagination[M], err error) {
+	var model M
+	var models []M
+
+	builder := sq.
+		Select("*").
+		From(model.TableName()).
+		Where(filter).
+		Where("deleted_at IS NULL").
+		OrderBy("id DESC").
+		Limit(uint64(limit + 1)).
+		Offset(uint64((page - 1) * limit))
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return res, err
+	}
+
+	err = r.readConn.WithContext(ctx).Raw(qry, args...).Scan(&models).Error
+	if err != nil {
+		return res, err
+	}
+
+	if len(models) > limit {
+		res.HasNext = true
+		models = models[:limit]
+	}
+
+	if page > 1 {
+		res.HasPrev = true
+	}
+
+	res.Data = models
+	return res, nil
 }
 
 // Create execute a single insert without specified transaction

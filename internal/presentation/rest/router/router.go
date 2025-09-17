@@ -19,7 +19,8 @@ func NewRouter(loanUsecase loan.ILoanUsecase) *gin.Engine {
 		loans := api.Group("/loan")
 		{
 			loans.POST("", handler.CreateLoan)
-			// loans.GET("/:id", handler.GetLoan)
+			loans.GET("", handler.ListLoan)
+			loans.GET("/:id", handler.DetailLoan)
 			loans.PATCH("/:id/reject", handler.RejectLoan)
 			loans.PATCH("/:id/approve", handler.ApproveLoan)
 			// loans.POST("/:id/investments", handler.AddInvestment)
