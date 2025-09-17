@@ -5,6 +5,7 @@ import (
 	"log"
 
 	borrowerrepo "github.com/BagusAK95/amarta_test/internal/application/borrower/repository"
+	employeerepo "github.com/BagusAK95/amarta_test/internal/application/employee/repository"
 	loanrepo "github.com/BagusAK95/amarta_test/internal/application/loan/repository"
 	loanuc "github.com/BagusAK95/amarta_test/internal/application/loan/usecase"
 	"github.com/BagusAK95/amarta_test/internal/config"
@@ -25,11 +26,12 @@ func main() {
 	dbConn := database.OpenConnection(cfg.Postgres, dbConfig)
 
 	// Initialize repository
+	employeeRepo := employeerepo.NewEmployeeRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 	borrowerRepo := borrowerrepo.NewBorrowerRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 	loanRepo := loanrepo.NewLoanRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 
 	// Initialize usecase
-	loanUsecase := loanuc.NewLoanUsecase(loanRepo, borrowerRepo)
+	loanUsecase := loanuc.NewLoanUsecase(loanRepo, borrowerRepo, employeeRepo)
 
 	// Start server
 	gin.SetMode(gin.ReleaseMode)

@@ -15,6 +15,8 @@ CREATE TABLE loans (
     signed_agreement_url VARCHAR,
     disbursement_date TIMESTAMPTZ,
 
+    reject_reason VARCHAR,
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ

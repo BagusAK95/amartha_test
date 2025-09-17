@@ -20,7 +20,8 @@ func NewRouter(loanUsecase loan.ILoanUsecase) *gin.Engine {
 		{
 			loans.POST("", handler.CreateLoan)
 			// loans.GET("/:id", handler.GetLoan)
-			// loans.POST("/:id/approve", handler.ApproveLoan)
+			loans.PATCH("/:id/reject", handler.RejectLoan)
+			loans.PATCH("/:id/approve", handler.ApproveLoan)
 			// loans.POST("/:id/investments", handler.AddInvestment)
 			// loans.POST("/:id/disburse", handler.DisburseLoan)
 		}
