@@ -13,6 +13,7 @@ import (
 type IBaseRepo[M model.EntityModel] interface {
 	GetAll(ctx context.Context) ([]M, error)
 	GetByID(ctx context.Context, ID uuid.UUID) (M, error)
+	GetByIDLockTx(ctx context.Context, ID uuid.UUID, trx *gorm.DB) (M, error)
 	GetByIDs(ctx context.Context, IDs []uuid.UUID) ([]M, error)
 	Pagination(ctx context.Context, filter map[string]any, page int, limit int) (res Pagination[M], err error)
 	Create(ctx context.Context, model M) (M, error)
@@ -74,6 +75,23 @@ func (r *BaseRepo[M]) GetByID(ctx context.Context, ID uuid.UUID) (M, error) {
 	}
 
 	err = r.readConn.WithContext(ctx).Raw(qry, args...).Scan(&model).Error
+	if err != nil {
+		return model, err
+	}
+
+	return model, nil
+}
+
+func (r *BaseRepo[M]) GetByIDLockTx(ctx context.Context, ID uuid.UUID, trx *gorm.DB) (M, error) {
+	var model M
+
+	builder := sq.Select("*").From(model.TableName()).Where(sq.Eq{"id": ID}).Where("deleted_at IS NULL").Suffix("FOR UPDATE")
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return model, err
+	}
+
+	err = trx.WithContext(ctx).Raw(qry, args...).Scan(&model).Error
 	if err != nil {
 		return model, err
 	}

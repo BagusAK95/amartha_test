@@ -1,8 +1,12 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/BagusAK95/amarta_test/internal/domain/common/repository"
 	"github.com/BagusAK95/amarta_test/internal/domain/investment"
+	sq "github.com/Masterminds/squirrel"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,4 +24,28 @@ func NewInvestmentRepo(dbMaster *gorm.DB, dbSlave *gorm.DB) investment.IInvestme
 		writeConn: dbMaster,
 		readConn:  dbSlave,
 	}
+}
+
+func (r *investmentRepo) GetTotalInvestmentByLoanID(ctx context.Context, loanID uuid.UUID) (total float64, err error) {
+	var model investment.Investment
+
+	builder := sq.
+		Select("COALESCE(SUM(amount), 0)").
+		From(model.TableName()).
+		Where(sq.Eq{
+			"loan_id":    loanID,
+			"deleted_at": nil,
+		})
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return
+	}
+
+	err = r.readConn.WithContext(ctx).Raw(qry, args...).Scan(&total).Error
+	if err != nil {
+		return
+	}
+
+	return
 }

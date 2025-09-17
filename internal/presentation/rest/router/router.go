@@ -1,30 +1,38 @@
 package router
 
 import (
+	investmenthttp "github.com/BagusAK95/amarta_test/internal/application/investment/delivery/http"
 	loanhttp "github.com/BagusAK95/amarta_test/internal/application/loan/delivery/http"
+	"github.com/BagusAK95/amarta_test/internal/domain/investment"
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
 	"github.com/BagusAK95/amarta_test/internal/presentation/rest/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(loanUsecase loan.ILoanUsecase) *gin.Engine {
+func NewRouter(loanUsecase loan.ILoanUsecase, investmentUsecase investment.IInvestmentUsecase) *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.ErrorHandler())
 
-	handler := loanhttp.NewLoanHandler(loanUsecase)
+	loanHandler := loanhttp.NewLoanHandler(loanUsecase)
+	investmentHandler := investmenthttp.NewInvestmentHandler(investmentUsecase)
 
 	// API v1 routes
 	api := router.Group("/api/v1")
 	{
 		loans := api.Group("/loan")
+		loans.Use(middleware.AuthMiddleware(middleware.RoleEmployee))
 		{
-			loans.POST("", handler.CreateLoan)
-			loans.GET("", handler.ListLoan)
-			loans.GET("/:id", handler.DetailLoan)
-			loans.PATCH("/:id/reject", handler.RejectLoan)
-			loans.PATCH("/:id/approve", handler.ApproveLoan)
-			// loans.POST("/:id/investments", handler.AddInvestment)
-			// loans.POST("/:id/disburse", handler.DisburseLoan)
+			loans.POST("", loanHandler.CreateLoan)
+			loans.GET("", loanHandler.ListLoan)
+			loans.GET("/:id", loanHandler.DetailLoan)
+			loans.PATCH("/:id/reject", loanHandler.RejectLoan)
+			loans.PATCH("/:id/approve", loanHandler.ApproveLoan)
+		}
+
+		investments := api.Group("/investment")
+		investments.Use(middleware.AuthMiddleware(middleware.RoleInvestor))
+		{
+			investments.POST("", investmentHandler.AddInvestment)
 		}
 	}
 

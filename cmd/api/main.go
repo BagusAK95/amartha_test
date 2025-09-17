@@ -6,6 +6,9 @@ import (
 
 	borrowerrepo "github.com/BagusAK95/amarta_test/internal/application/borrower/repository"
 	employeerepo "github.com/BagusAK95/amarta_test/internal/application/employee/repository"
+	investmentrepo "github.com/BagusAK95/amarta_test/internal/application/investment/repository"
+	investmentuc "github.com/BagusAK95/amarta_test/internal/application/investment/usecase"
+	investorrepo "github.com/BagusAK95/amarta_test/internal/application/investor/repository"
 	loanrepo "github.com/BagusAK95/amarta_test/internal/application/loan/repository"
 	loanuc "github.com/BagusAK95/amarta_test/internal/application/loan/usecase"
 	"github.com/BagusAK95/amarta_test/internal/config"
@@ -29,13 +32,16 @@ func main() {
 	employeeRepo := employeerepo.NewEmployeeRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 	borrowerRepo := borrowerrepo.NewBorrowerRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 	loanRepo := loanrepo.NewLoanRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
+	investmentRepo := investmentrepo.NewInvestmentRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
+	investorRepo := investorrepo.NewInvestorRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 
 	// Initialize usecase
 	loanUsecase := loanuc.NewLoanUsecase(loanRepo, borrowerRepo, employeeRepo)
+	investmentUsecase := investmentuc.NewInvestmentUsecase(investmentRepo, investorRepo, loanRepo)
 
 	// Start server
 	gin.SetMode(gin.ReleaseMode)
-	r := router.NewRouter(loanUsecase)
+	r := router.NewRouter(loanUsecase, investmentUsecase)
 
 	serverAddr := fmt.Sprintf(":%d", cfg.Application.Port)
 	log.Printf("🚀 Starting server on %s", serverAddr)
