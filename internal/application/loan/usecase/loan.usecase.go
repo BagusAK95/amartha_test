@@ -16,16 +16,18 @@ func NewLoanUsecase(loanRepo loan.ILoanRepository) loan.ILoanUsecase {
 	}
 }
 
-func (u *loanUsecase) CreateLoan(ctx context.Context, body loan.CreateLoanRequest) (*loan.Loan, error) {
-	loan, err := u.loanRepo.Create(ctx, loan.Loan{
-		BorrowerID:      body.BorrowerID,
-		PrincipalAmount: body.Principal,
-		Rate:            body.Rate,
-		ROI:             body.ROI,
+func (u *loanUsecase) CreateLoan(ctx context.Context, req loan.CreateLoanRequest) (*loan.Loan, error) {
+	newLoan, err := u.loanRepo.Create(ctx, loan.Loan{
+		BorrowerID:         req.BorrowerID,
+		PrincipalAmount:    req.PrincipalAmount,
+		Rate:               req.Rate,
+		ROI:                req.ROI,
+		AgreementLetterURL: req.AgreementLetterURL,
+		State:              loan.StateProposed,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &loan, nil
+	return &newLoan, nil
 }

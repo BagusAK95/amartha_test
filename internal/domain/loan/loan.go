@@ -8,15 +8,15 @@ import (
 
 type Loan struct {
 	model.BaseModel
-	BorrowerID         string
-	PrincipalAmount    float64
-	Rate               float64
-	ROI                float64
-	State              State
-	AgreementLetterURL string
+	BorrowerID         string  `json:"borrower_id"`
+	PrincipalAmount    float64 `json:"principal_amount"`
+	Rate               float64 `json:"rate"`
+	ROI                float64 `json:"roi"`
+	State              State   `json:"state"`
+	AgreementLetterURL string  `json:"agreement_letter_url"`
 
-	ApprovalDetails     ApprovalDetails     `gorm:"embedded"`
-	DisbursementDetails DisbursementDetails `gorm:"embedded"`
+	ApprovalDetails     ApprovalDetails     `json:"approval_details" gorm:"embedded"`
+	DisbursementDetails DisbursementDetails `json:"disbursement_details" gorm:"embedded"`
 }
 
 func (Loan) TableName() string {
@@ -33,13 +33,13 @@ const (
 )
 
 type ApprovalDetails struct {
-	FieldValidatorEmployeeID string    `json:"field_validator_employee_id"`
-	VisitProofPictureURL     string    `json:"visit_proof_picture_url"`
-	ApprovalDate             time.Time `json:"approval_date"`
+	ValidatorEmployeeID  *string    `json:"validator_employee_id"`
+	VisitProofPictureURL *string    `json:"visit_proof_picture_url"`
+	ApprovalDate         *time.Time `json:"approval_date"`
 }
 
 type DisbursementDetails struct {
-	FieldOfficerEmployeeID string    `json:"field_officer_employee_id"`
-	SignedAgreementURL     string    `json:"signed_agreement_url"`
-	DisbursementDate       time.Time `json:"disbursement_date"`
+	OfficerEmployeeID  *string    `json:"officer_employee_id"`
+	SignedAgreementURL *string    `json:"signed_agreement_url"`
+	DisbursementDate   *time.Time `json:"disbursement_date"`
 }
