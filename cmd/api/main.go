@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	borrowerrepo "github.com/BagusAK95/amarta_test/internal/application/borrower/repository"
 	employeerepo "github.com/BagusAK95/amarta_test/internal/application/employee/repository"
@@ -61,12 +67,36 @@ func main() {
 
 	// Start server
 	gin.SetMode(gin.ReleaseMode)
+
 	r := router.NewRouter(loanUsecase, investmentUsecase, tracer)
+	addr := fmt.Sprintf(":%d", cfg.Application.Port)
 
-	serverAddr := fmt.Sprintf(":%d", cfg.Application.Port)
-	log.Printf("🚀 Starting server on %s", serverAddr)
-
-	if err := r.Run(serverAddr); err != nil {
-		log.Fatalf("❌ Failed to start server: %v", err)
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: r,
 	}
+
+	go func() {
+		log.Printf("🚀 Starting server on %s\n", addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("❌ Failed to start server: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	<-quit
+	log.Println("💤 Shutting down server...")
+
+	// Close connection
+	database.CloseConnection(dbConn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("❌ Server forced to shutdown: %v", err)
+	}
+
+	log.Println("✅ Server exiting")
 }
