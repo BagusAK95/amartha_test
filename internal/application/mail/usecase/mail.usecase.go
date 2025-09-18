@@ -10,10 +10,10 @@ import (
 )
 
 type mailUsecase struct {
-	mailSender *mailsender.Sender
+	mailSender mailsender.ISender
 }
 
-func NewMailUsecase(mailSender *mailsender.Sender) mail.IMailUsecase {
+func NewMailUsecase(mailSender mailsender.ISender) mail.IMailUsecase {
 	return &mailUsecase{
 		mailSender: mailSender,
 	}

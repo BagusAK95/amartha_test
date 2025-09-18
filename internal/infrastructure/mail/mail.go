@@ -8,6 +8,10 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+type ISender interface {
+	SendEmailWithTemplate(to, subject, file string, data any) error
+}
+
 type Sender struct {
 	Host     string
 	Port     int
@@ -15,7 +19,7 @@ type Sender struct {
 	Password string
 }
 
-func NewSender(cfg config.MailConfig) *Sender {
+func NewSender(cfg config.MailConfig) ISender {
 	return &Sender{
 		Host:     cfg.Host,
 		Port:     cfg.Port,
