@@ -45,9 +45,3 @@ type DisbursementDetails struct {
 	SignedAgreementURL *string    `json:"signed_agreement_url"`
 	DisbursementDate   *time.Time `json:"disbursement_date"`
 }
-
-type DisburseLoanRequest struct {
-	SignedAgreementURL string    `json:"signed_agreement_url" binding:"required"`
-	OfficerEmployeeID  uuid.UUID `json:"officer_employee_id" binding:"required"`
-	DisbursementDate   time.Time `json:"disbursement_date" binding:"required"`
-}

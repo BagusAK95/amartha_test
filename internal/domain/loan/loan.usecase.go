@@ -16,28 +16,3 @@ type ILoanUsecase interface {
 	DetailLoan(ctx context.Context, loanID uuid.UUID) (*Loan, error)
 	GetLoanAgreementDetail(ctx context.Context, loanID uuid.UUID) (*LoanAgreementResponse, error)
 }
-
-// TODO: Move to DTO folder
-type CreateLoanRequest struct {
-	BorrowerID         uuid.UUID `json:"borrower_id" binding:"required"`
-	PrincipalAmount    float64   `json:"principal_amount" binding:"required"`
-	Rate               float32   `json:"rate" binding:"required"`
-	ROI                float32   `json:"roi" binding:"required"`
-	AgreementLetterURL string    `json:"agreement_letter_url" binding:"required"`
-}
-
-type RejectLoanRequest struct {
-	RejectReason string `json:"reject_reason" binding:"required"`
-}
-
-type ApproveLoanRequest struct {
-	ValidatorEmployeeID  uuid.UUID `json:"validator_employee_id" binding:"required"`
-	VisitProofPictureURL string    `json:"visit_proof_picture_url" binding:"required"`
-}
-
-type LoanAgreementResponse struct {
-	LoanID          uuid.UUID
-	PrincipalAmount float64
-	InterestRate    float32
-	BorrowerName    string
-}
