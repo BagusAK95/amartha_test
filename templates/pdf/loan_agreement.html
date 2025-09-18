@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Investment Agreement - {{ .LoanID }}</title>
+    <title>Loan Agreement - {{.LoanID}}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -42,13 +42,13 @@
         .summary-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 10px;
         }
         .summary-item strong {
-            display: block;
-            font-size: 9pt;
+            font-size: 10pt;
             color: #6b7280;
             text-transform: uppercase;
+            margin-right: 5px;
         }
         .content-section h2 {
             font-size: 14pt;
@@ -68,6 +68,20 @@
         .terms-list li {
             margin-bottom: 15px;
         }
+        .signature-section {
+            margin-top: 1in;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .signature-block {
+            width: 45%;
+        }
+        .signature-line {
+            border-bottom: 1px solid #000;
+            margin-top: 50px;
+            margin-bottom: 5px;
+        }
         .footer-note {
             margin-top: 1.5in;
             text-align: center;
@@ -79,27 +93,24 @@
 <body>
 
     <div class="header">
-        <h1>Investment Agreement</h1>
-        <p>This document is the executed copy of the agreement for the investment detailed below.</p>
+        <h1>Loan Agreement</h1>
+        <p>This document outlines the terms and conditions of the loan provided to the Borrower.</p>
     </div>
 
     <div class="summary-box">
-        <h2>Investment Summary</h2>
+        <h2>Loan Summary</h2>
         <div class="summary-grid">
-            <div class="summary-item"><strong>Agreement ID</strong> {{ .AgreementID }}</div>
-            <div class="summary-item"><strong>Loan ID</strong> {{ .LoanID }}</div>
-            <div class="summary-item"><strong>Investment Amount</strong> {{ FormatCurrency .InvestmentAmount }}</div>
-            <div class="summary-item"><strong>Return of Investment</strong> {{ .ROI }}%</div>
-            <div class="summary-item"><strong>Effective Date</strong> {{ FormatDate .AgreementDate}}</div>
+            <div class="summary-item"><strong>Loan ID:</strong> {{.LoanID}}</div>
+            <div class="summary-item"><strong>Principal Amount:</strong> {{FormatCurrency .PrincipalAmount}}</div>
+            <div class="summary-item"><strong>Interest Rate:</strong> {{.InterestRate}}%</div>
         </div>
     </div>
 
     <div class="content-section">
         <h2>1. Parties to the Agreement</h2>
         <div class="parties-list">
-            <p><strong>The Investor:</strong> {{ .InvestorName }}</p>
-            <p><strong>The Borrower:</strong> {{ .BorrowerName }}</p>
-            <p><strong>The Platform:</strong> Amartha, which facilitates and services the loan.</p>
+            <p><strong>The Lender:</strong> Amartha</p>
+            <p><strong>The Borrower:</strong> {{.BorrowerName}}</p>
         </div>
     </div>
 
@@ -107,23 +118,31 @@
         <h2>2. Terms of Agreement</h2>
         <div class="terms-list">
             <ol>
-                <li><strong>The Investment:</strong> The Investor has agreed to contribute the Investment Amount to the Loan identified above, for the benefit of the Borrower.</li>
-                <li><strong>Repayment:</strong> The Borrower is obligated to repay the loan principal and interest as per the loan's repayment schedule. The Platform will process these payments and distribute the Investor's share to their account.</li>
-                <li><strong>Risk of Investment:</strong> The Investor acknowledges that this investment is not insured or guaranteed. The investment carries financial risk, including the potential for partial or total loss of principal if the Borrower defaults on their obligation.</li>
-                <li><strong>Platform Role & Fees:</strong> The Platform acts as the loan servicer. The Investor agrees that the Platform may deduct a service fee from the gross returns of the investment, as detailed in the Platform's Terms of Service.</li>
+                <li><strong>Loan Amount:</strong> The Lender agrees to lend the Borrower the Principal Amount as stated above.</li>
+                <li><strong>Interest:</strong> The Loan shall bear interest at the Interest Rate specified above, calculated on the outstanding principal balance.</li>
+                <li><strong>Repayment:</strong> The Borrower agrees to repay the Principal Amount and accrued interest as per the loan's repayment schedule.</li>
+                <li><strong>Default:</strong> In the event of default, the Borrower shall be subject to penalties as outlined in Amartha's lending policy.</li>
                 <li><strong>Governing Law:</strong> This agreement is governed by the laws of Indonesia.</li>
             </ol>
         </div>
     </div>
 
-    <div class="content-section">
-        <h2>3. Agreement and Acceptance</h2>
-        <p>By completing the investment transaction on <strong>{{ FormatDate .AgreementDate }}</strong> via the Platform, the Investor has electronically signed and agreed to all terms and conditions outlined in this Investment Agreement and the governing Platform Terms of Service. This document serves as the final record of that binding agreement. No further signature is required.</p>
+    <div class="signature-section">
+        <div class="signature-block">
+            <div class="signature-line"></div>
+            <p><strong>{{.BorrowerName}}</strong></p>
+            <p>Borrower</p>
+        </div>
+        <div class="signature-block">
+            <div class="signature-line"></div>
+            <p><strong>Amartha Representative</strong></p>
+            <p>For Amartha</p>
+        </div>
     </div>
 
     <div class="footer-note">
         <p>Please retain this document for your personal records.<br>
-        If you have any questions, please contact Investor Support at support@amartha.com.</p>
+        If you have any questions, please contact Borrower Support at support@amartha.com.</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -131,8 +150,8 @@
         window.onload = function() {
             const element = document.body;
             var opt = {
-                margin:       10,
-                filename:     'investment_agreement_{{.LoanID}}.pdf',
+                margin:       5,
+                filename:     'loan_agreement_{{.LoanID}}.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'mm', format: 'legal', orientation: 'portrait' }

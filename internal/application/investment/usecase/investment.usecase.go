@@ -34,6 +34,8 @@ func NewInvestmentUsecase(investmentRepo investment.IInvestmentRepository, inves
 }
 
 func (u *investmentUsecase) AddInvestment(ctx context.Context, investorID uuid.UUID, req investment.CreateInvestmentRequest) (res *investment.Investment, err error) {
+	// TODO: Context timeout
+
 	trx := u.investmentRepo.BeginTransaction(ctx)
 	defer func() {
 		if err != nil {
@@ -94,20 +96,16 @@ func (u *investmentUsecase) AddInvestment(ctx context.Context, investorID uuid.U
 	}
 
 	// TODO: Async process
-	err = u.mailSender.SendEmailWithTemplate(validInvestor.Email, "Investment Confirmed", "investment_confirmed.html", map[string]any{
-		"LoanID":           validLoan.ID.String(),
+	u.mailSender.SendEmailWithTemplate(validInvestor.Email, "Your Investment is Confirmed", "investment_confirmed.html", map[string]any{
 		"InvestmentID":     newInvestment.ID.String(),
+		"LoanID":           validLoan.ID.String(),
 		"InvestorName":     validInvestor.FullName,
 		"InvestmentAmount": req.Amount,
-		"InterestRate":     validLoan.Rate,
+		"ROI":              validLoan.ROI,
 		"AgreementDate":    newInvestment.CreatedAt,
-		"Year":             time.Now().Year(),
 		"AppUrl":           config.APP_URL,
+		"Year":             time.Now().Year(),
 	})
-
-	if err != nil {
-		return nil, err
-	}
 
 	return &newInvestment, nil
 }
@@ -124,7 +122,20 @@ func (u *investmentUsecase) checkLoanInvested(ctx context.Context, validLoan loa
 		return err
 	}
 
-	// TODO: Sent email to borrower
+	validBorrower, err := u.borrowerRepo.GetByID(ctx, validLoan.BorrowerID)
+	if err != nil {
+		return err
+	}
+
+	// TODO: Async process
+	u.mailSender.SendEmailWithTemplate(validBorrower.Email, "Your Loan Has Been Funded", "loan_invested.html", map[string]any{
+		"BorrowerName": validBorrower.FullName,
+		"LoanID":       validLoan.ID.String(),
+		"LoanAmount":   validLoan.PrincipalAmount,
+		"InterestRate": validLoan.Rate,
+		"AppUrl":       config.APP_URL,
+		"Year":         time.Now().Year(),
+	})
 
 	return nil
 }
@@ -162,7 +173,7 @@ func (u *investmentUsecase) GetInvestmentAgreementDetail(ctx context.Context, in
 		AgreementID:      inv.ID,
 		AgreementDate:    *inv.CreatedAt,
 		InvestmentAmount: inv.Amount,
-		InterestRate:     loanData.Rate,
+		ROI:              loanData.ROI,
 		LoanID:           loanData.ID,
 		InvestorName:     investorData.FullName,
 		BorrowerName:     borrowerData.FullName,

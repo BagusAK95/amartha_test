@@ -22,7 +22,7 @@ type InvestmentAgreementResponse struct {
 	AgreementID      uuid.UUID
 	AgreementDate    time.Time
 	InvestmentAmount float64
-	InterestRate     float32
+	ROI              float32
 	LoanID           uuid.UUID
 	LoanTerm         int
 	InvestorName     string

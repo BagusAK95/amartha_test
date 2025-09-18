@@ -35,6 +35,7 @@ func NewRouter(loanUsecase loan.ILoanUsecase, investmentUsecase investment.IInve
 			investments.POST("", investmentHandler.AddInvestment)
 		}
 
+		api.GET("/loan/agreement/file/:loan_id", loanHandler.GetLoanAgreementFile)
 		api.GET("/investment/agreement/file/:investment_id", investmentHandler.GetInvestmentAgreementFile)
 	}
 

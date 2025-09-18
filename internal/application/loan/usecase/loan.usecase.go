@@ -124,3 +124,28 @@ func (u *loanUsecase) ListLoan(ctx context.Context, state *string, page int, lim
 
 	return loans, nil
 }
+
+func (u *loanUsecase) GetLoanAgreementDetail(ctx context.Context, loanID uuid.UUID) (*loan.LoanAgreementResponse, error) {
+	loanData, err := u.loanRepo.GetByID(ctx, loanID)
+	if err != nil {
+		return nil, err
+	} else if loanData.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("loan not found")
+	} else if loanData.State == loan.StateProposed || loanData.State == loan.StateApproved {
+		return nil, httpError.NewNotFoundError("loan not found")
+	}
+
+	borrowerData, err := u.borrowerRepo.GetByID(ctx, loanData.BorrowerID)
+	if err != nil {
+		return nil, err
+	} else if borrowerData.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("borrower not found")
+	}
+
+	return &loan.LoanAgreementResponse{
+		LoanID:          loanData.ID,
+		PrincipalAmount: loanData.PrincipalAmount,
+		InterestRate:    loanData.Rate,
+		BorrowerName:    borrowerData.FullName,
+	}, nil
+}

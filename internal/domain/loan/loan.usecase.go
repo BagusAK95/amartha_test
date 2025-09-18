@@ -13,6 +13,7 @@ type ILoanUsecase interface {
 	ApproveLoan(ctx context.Context, loanID uuid.UUID, req ApproveLoanRequest) (*Loan, error)
 	ListLoan(ctx context.Context, state *string, page int, limit int) (repository.Pagination[Loan], error)
 	DetailLoan(ctx context.Context, loanID uuid.UUID) (*Loan, error)
+	GetLoanAgreementDetail(ctx context.Context, loanID uuid.UUID) (*LoanAgreementResponse, error)
 }
 
 // TODO: Move to DTO folder
@@ -31,4 +32,11 @@ type RejectLoanRequest struct {
 type ApproveLoanRequest struct {
 	ValidatorEmployeeID  uuid.UUID `json:"validator_employee_id" binding:"required"`
 	VisitProofPictureURL string    `json:"visit_proof_picture_url" binding:"required"`
+}
+
+type LoanAgreementResponse struct {
+	LoanID          uuid.UUID
+	PrincipalAmount float64
+	InterestRate    float32
+	BorrowerName    string
 }
