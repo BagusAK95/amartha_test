@@ -27,6 +27,7 @@ func NewRouter(loanUsecase loan.ILoanUsecase, investmentUsecase investment.IInve
 			loans.GET("/:id", loanHandler.DetailLoan)
 			loans.PATCH("/:id/reject", loanHandler.RejectLoan)
 			loans.PATCH("/:id/approve", loanHandler.ApproveLoan)
+			loans.PATCH("/:id/disburse", loanHandler.DisburseLoan)
 		}
 
 		investments := api.Group("/investment")

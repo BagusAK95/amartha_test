@@ -100,6 +100,36 @@ func (u *loanUsecase) ApproveLoan(ctx context.Context, loanID uuid.UUID, req loa
 	return &updatedLoan, nil
 }
 
+func (u *loanUsecase) DisburseLoan(ctx context.Context, loanID uuid.UUID, req loan.DisburseLoanRequest) (*loan.Loan, error) {
+	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
+	if err != nil {
+		return nil, err
+	} else if validLoan.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("loan not found")
+	} else if validLoan.State != loan.StateInvested {
+		return nil, httpError.NewBadRequestError("loan is not in invested state")
+	}
+
+	validEmployee, err := u.employeeRepo.GetByID(ctx, req.OfficerEmployeeID)
+	if err != nil {
+		return nil, err
+	} else if validEmployee.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("officer employee not found")
+	}
+
+	updatedLoan, err := u.loanRepo.UpdateWithMap(ctx, loanID, map[string]any{
+		"state":                loan.StateDisbursed,
+		"disbursement_date":    req.DisbursementDate,
+		"officer_employee_id":  req.OfficerEmployeeID,
+		"signed_agreement_url": req.SignedAgreementURL,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedLoan, nil
+}
+
 func (u *loanUsecase) DetailLoan(ctx context.Context, loanID uuid.UUID) (*loan.Loan, error) {
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {

@@ -81,6 +81,28 @@ func (h *loanHandler) ApproveLoan(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+func (h *loanHandler) DisburseLoan(c *gin.Context) {
+	loanID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		_ = c.Error(httpError.NewBadRequestError(err.Error()))
+		return
+	}
+
+	var body loan.DisburseLoanRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		_ = c.Error(httpError.NewBadRequestError(err.Error()))
+		return
+	}
+
+	res, err := h.usecase.DisburseLoan(c.Request.Context(), loanID, body)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
 func (h *loanHandler) ListLoan(c *gin.Context) {
 	var state *string
 	if stateStr := c.Query("state"); stateStr != "" {
