@@ -160,3 +160,11 @@ The project uses `golang-migrate` for managing database migrations.
 -   `make migration-apply DRIVER=postgres`: Applies all pending migrations.
 -   `make migration-rollback DRIVER=postgres`: Rolls back the last applied migration.
 -   `make migration-create DRIVER=postgres NAME=<migration_name>`: Creates new up/down migration files.
+
+## How to Test
+
+To run all unit tests for the project:
+
+```bash
+go test ./...
+```
