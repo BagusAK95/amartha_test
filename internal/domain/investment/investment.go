@@ -7,9 +7,9 @@ import (
 
 type Investment struct {
 	model.BaseModel
-	LoanID     uuid.UUID
-	InvestorID uuid.UUID
-	Amount     float64
+	LoanID     uuid.UUID `json:"loan_id"`
+	InvestorID uuid.UUID `json:"investor_id"`
+	Amount     float64   `json:"amount"`
 }
 
 func (Investment) TableName() string {
