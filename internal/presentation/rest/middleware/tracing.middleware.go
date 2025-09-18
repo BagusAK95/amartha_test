@@ -30,7 +30,7 @@ func TracingMiddleware(tracer opentracing.Tracer) gin.HandlerFunc {
 				ext.Error.Set(span, true)
 			}
 
-			if status >= 400 && status <= 599 {
+			if status >= 400 && status <= 599 && len(c.Errors) > 0 {
 				err := c.Errors.Last().Err
 				span.LogKV(
 					"event", "error",

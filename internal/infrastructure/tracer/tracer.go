@@ -12,6 +12,7 @@ import (
 
 func Init(cfg config.JaegerConfig) (opentracing.Tracer, io.Closer) {
 	cfgSource := &jaegercfg.Configuration{
+		ServiceName: cfg.ServiceName,
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
@@ -22,14 +23,7 @@ func Init(cfg config.JaegerConfig) (opentracing.Tracer, io.Closer) {
 		},
 	}
 
-	jcfg, err := cfgSource.FromEnv()
-	if err != nil {
-		panic(fmt.Sprintf("cannot parse jaeger env: %v", err))
-	}
-
-	jcfg.ServiceName = cfg.ServiceName
-
-	tracer, closer, err := jcfg.NewTracer()
+	tracer, closer, err := cfgSource.NewTracer()
 	if err != nil {
 		panic(fmt.Sprintf("cannot create new tracer: %v", err))
 	}

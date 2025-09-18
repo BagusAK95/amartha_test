@@ -91,6 +91,38 @@ These endpoints do not require authentication.
 
 ## How to Run
 
+### Using Docker Compose (Recommended)
+
+1.  **Ensure Docker is running:** Make sure Docker Desktop or Docker Engine is running on your system.
+
+2.  **Build and run the services:**
+    ```bash
+    docker-compose up --build -d
+    ```
+
+3.  **Run database migrations:**
+    Once the services are up, you need to apply database migrations. You can do this by executing the migration command inside the `app` container:
+    ```bash
+    docker-compose exec app make migration-apply DRIVER=postgres
+    ```
+
+4.  **Access the application and tools:**
+    -   The API server will be accessible at `http://localhost:8080`.
+    -   Mailhog web UI: `http://localhost:8025`
+    -   Jaeger web UI: `http://localhost:16686`
+
+5.  **Stop the services:**
+    To stop and remove the containers, networks, and volumes created by `docker-compose up`:
+    ```bash
+    docker-compose down
+    ```
+    To stop only the containers but keep them for later restart:
+    ```bash
+    docker-compose stop
+    ```
+
+### Without Docker Compose
+
 1.  **Build the application:**
     ```bash
     go build -o main cmd/api/main.go
@@ -105,13 +137,13 @@ These endpoints do not require authentication.
     go run cmd/api/main.go
     ```
 
-The API server will start on the port specified in your `.env` file (default: `8080`).
+The API server will start on the port specified in your `.env` file (default: `8081`).
 
 ## Environment Variables
 
 The application uses the following environment variables, typically loaded from a `.env` file:
 
--   `APP_PORT`: Port for the HTTP server (e.g., `8080`).
+-   `APP_PORT`: Port for the HTTP server (e.g., `8081`).
 -   `POSTGRES_HOST`: PostgreSQL host.
 -   `POSTGRES_PORT`: PostgreSQL port.
 -   `POSTGRES_USERNAME`: PostgreSQL username.

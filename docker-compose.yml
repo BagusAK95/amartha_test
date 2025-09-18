@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: amartha_test_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: always
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.6.0
+    restart: always
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+    ports:
+      - "16686:16686" # Web UI
+      - "6831:6831/udp"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      APP_NAME: amartha_test
+      APP_PORT: 8081
+      APP_ENV: local
+      APP_URL: http://localhost:8081
+      POSTGRES_MASTER_HOST: db
+      POSTGRES_MASTER_USERNAME: user
+      POSTGRES_MASTER_PASSWORD: password
+      POSTGRES_MASTER_PORT: 5432
+      POSTGRES_MASTER_SSL_MODE: disable
+      POSTGRES_SLAVE_HOST: db
+      POSTGRES_SLAVE_USERNAME: user
+      POSTGRES_SLAVE_PASSWORD: password
+      POSTGRES_SLAVE_PORT: 5432
+      POSTGRES_SLAVE_SSL_MODE: disable
+      POSTGRES_DATABASE: amartha_test_db
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ''
+      MAIL_PASSWORD: ''
+      JAEGER_HOST: jaeger
+      JAEGER_PORT: 6831
+      JAEGER_SERVICE_NAME: amartha-test
+
+    depends_on:
+      - db
+      - mailhog
+      - jaeger
+
+volumes:
+  db-data:
