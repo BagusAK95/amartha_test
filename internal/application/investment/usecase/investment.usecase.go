@@ -2,10 +2,14 @@ package usecase
 
 import (
 	"context"
+	"time"
 
+	"github.com/BagusAK95/amarta_test/internal/config"
+	"github.com/BagusAK95/amarta_test/internal/domain/borrower"
 	"github.com/BagusAK95/amarta_test/internal/domain/investment"
 	"github.com/BagusAK95/amarta_test/internal/domain/investor"
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
+	"github.com/BagusAK95/amarta_test/internal/infrastructure/mail"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -15,13 +19,17 @@ type investmentUsecase struct {
 	investmentRepo investment.IInvestmentRepository
 	investorRepo   investor.IInvestorRepository
 	loanRepo       loan.ILoanRepository
+	borrowerRepo   borrower.IBorrowerRepository
+	mailSender     *mail.Sender
 }
 
-func NewInvestmentUsecase(investmentRepo investment.IInvestmentRepository, investorRepo investor.IInvestorRepository, loanRepo loan.ILoanRepository) investment.IInvestmentUsecase {
+func NewInvestmentUsecase(investmentRepo investment.IInvestmentRepository, investorRepo investor.IInvestorRepository, loanRepo loan.ILoanRepository, borrowerRepo borrower.IBorrowerRepository, mailSender *mail.Sender) investment.IInvestmentUsecase {
 	return &investmentUsecase{
 		investmentRepo: investmentRepo,
 		investorRepo:   investorRepo,
 		loanRepo:       loanRepo,
+		borrowerRepo:   borrowerRepo,
+		mailSender:     mailSender,
 	}
 }
 
@@ -85,7 +93,21 @@ func (u *investmentUsecase) AddInvestment(ctx context.Context, investorID uuid.U
 		return nil, err
 	}
 
-	// TODO: Sent email to investor
+	// TODO: Async process
+	err = u.mailSender.SendEmailWithTemplate(validInvestor.Email, "Investment Confirmed", "investment_confirmed.html", map[string]any{
+		"LoanID":           validLoan.ID.String(),
+		"InvestmentID":     newInvestment.ID.String(),
+		"InvestorName":     validInvestor.FullName,
+		"InvestmentAmount": req.Amount,
+		"InterestRate":     validLoan.Rate,
+		"AgreementDate":    newInvestment.CreatedAt,
+		"Year":             time.Now().Year(),
+		"AppUrl":           config.APP_URL,
+	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &newInvestment, nil
 }
@@ -105,4 +127,44 @@ func (u *investmentUsecase) checkLoanInvested(ctx context.Context, validLoan loa
 	// TODO: Sent email to borrower
 
 	return nil
+}
+
+func (u *investmentUsecase) GetInvestmentAgreementDetail(ctx context.Context, investmentID uuid.UUID) (*investment.InvestmentAgreementResponse, error) {
+	inv, err := u.investmentRepo.GetByID(ctx, investmentID)
+	if err != nil {
+		return nil, err
+	} else if inv.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("investment not found")
+	}
+
+	loanData, err := u.loanRepo.GetByID(ctx, inv.LoanID)
+	if err != nil {
+		return nil, err
+	} else if loanData.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("loan not found")
+	}
+
+	investorData, err := u.investorRepo.GetByID(ctx, inv.InvestorID)
+	if err != nil {
+		return nil, err
+	} else if investorData.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("investor not found")
+	}
+
+	borrowerData, err := u.borrowerRepo.GetByID(ctx, loanData.BorrowerID)
+	if err != nil {
+		return nil, err
+	} else if borrowerData.ID == uuid.Nil {
+		return nil, httpError.NewNotFoundError("borrower not found")
+	}
+
+	return &investment.InvestmentAgreementResponse{
+		AgreementID:      inv.ID,
+		AgreementDate:    *inv.CreatedAt,
+		InvestmentAmount: inv.Amount,
+		InterestRate:     loanData.Rate,
+		LoanID:           loanData.ID,
+		InvestorName:     investorData.FullName,
+		BorrowerName:     borrowerData.FullName,
+	}, nil
 }

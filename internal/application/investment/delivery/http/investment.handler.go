@@ -5,6 +5,7 @@ import (
 
 	"github.com/BagusAK95/amarta_test/internal/domain/investment"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
+	"github.com/BagusAK95/amarta_test/internal/utils/html"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -35,4 +36,33 @@ func (h *investmentHandler) AddInvestment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, res)
+}
+
+func (h *investmentHandler) GetInvestmentAgreementFile(c *gin.Context) {
+	investmentID, err := uuid.Parse(c.Param("investment_id"))
+	if err != nil {
+		_ = c.Error(httpError.NewBadRequestError("invalid investment ID"))
+		return
+	}
+
+	agreementDetail, err := h.usecase.GetInvestmentAgreementDetail(c.Request.Context(), investmentID)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	tmpl, err := html.NewTemplate()
+	if err != nil {
+		_ = c.Error(httpError.NewInternalError("failed to load template"))
+		return
+	}
+
+	c.Header("Content-Type", "text/html")
+	c.Status(http.StatusOK)
+
+	err = tmpl.Execute(c.Writer, "investment_agreement.html", agreementDetail)
+	if err != nil {
+		_ = c.Error(httpError.NewInternalError("failed to render template"))
+		return
+	}
 }

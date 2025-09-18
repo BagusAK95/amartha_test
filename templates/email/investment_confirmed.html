@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Confirmed</title>
+</head>
+<body style="font-family: 'Manrope', Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+    <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.05);">
+        <div style="background-color: #63297A; padding: 40px; text-align: center;">
+            <!-- <img src="https://via.placeholder.com/150x40.png?text=Your+Logo" alt="Company Logo" style="max-width: 150px;"> -->
+        </div>
+        <div style="padding: 40px 40px 30px 40px;">
+            <h1 style="font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 15px 0;">Your Investment is Confirmed</h1>
+            <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 30px 0;">Dear {{ .InvestorName }},<br><br>
+            Thank you for your trust and investment. This email confirms that your funds have been successfully allocated to the loan detailed below. Your official agreement is attached for your records.</p>
+            
+            <table cellpadding="0" cellspacing="0" style="width: 100%; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: 20px 0; margin-bottom: 30px;">
+                <tbody>
+                    <tr style="font-size: 15px;">
+                        <td style="padding: 10px 0; color: #6b7280;">Loan ID</td>
+                        <td style="padding: 10px 0; font-weight: 600; color: #111827; text-align: right;">{{ .LoanID }}</td>
+                    </tr>
+                    <tr style="font-size: 15px;">
+                        <td style="padding: 10px 0; color: #6b7280;">Investment Amount</td>
+                        <td style="padding: 10px 0; font-weight: 600; color: #111827; text-align: right;">{{ FormatCurrency .InvestmentAmount }}</td>
+                    </tr>
+                    <tr style="font-size: 15px;">
+                        <td style="padding: 10px 0; color: #6b7280;">Interest Rate</td>
+                        <td style="padding: 10px 0; font-weight: 600; color: #111827; text-align: right;">{{ .InterestRate }}%</td>
+                    </tr>
+                    <tr style="font-size: 15px;">
+                        <td style="padding: 10px 0; color: #6b7280;">Effective Date</td>
+                        <td style="padding: 10px 0; font-weight: 600; color: #111827; text-align: right;">{{ FormatDate .AgreementDate }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <a href="{{ .AppUrl }}/api/v1/investment/agreement/file/{{ .InvestmentID }}" style="display: block; width: fit-content; margin: 0 auto; background-color: #63297A; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">Download Agreement PDF</a>
+        </div>
+        <div style="text-align: center; padding: 30px; font-size: 12px; color: #9ca3af;">
+            <p style="font-size: 12px; color: #9ca3af;">&copy; {{.Year}} Amartha. All rights reserved.</p>
+            <p style="font-size: 12px; color: #9ca3af;"><a href="#" style="color: #63297A; text-decoration: none;">Unsubscribe</a> | <a href="#" style="color: #63297A; text-decoration: none;">Account Settings</a></p>
+        </div>
+    </div>
+</body>
+</html>

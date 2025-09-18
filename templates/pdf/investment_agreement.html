@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Investment Agreement - {{ .LoanID }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #333;
+            margin: 0.5in;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 1in;
+        }
+        .header h1 {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #000;
+        }
+        .header p {
+            font-size: 10pt;
+            color: #6b7280;
+        }
+        .summary-box {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 1in;
+        }
+        .summary-box h2 {
+            font-size: 14pt;
+            font-weight: 600;
+            margin-top: 0;
+            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .summary-item strong {
+            display: block;
+            font-size: 9pt;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+        .content-section h2 {
+            font-size: 14pt;
+            font-weight: 600;
+            margin-top: 0;
+            color: #111827;
+        }
+        .content-section {
+            margin-bottom: 1in;
+        }
+        .parties-list p {
+            margin: 5px 0;
+        }
+        .terms-list ol {
+            padding-left: 20px;
+        }
+        .terms-list li {
+            margin-bottom: 15px;
+        }
+        .footer-note {
+            margin-top: 1.5in;
+            text-align: center;
+            font-size: 10pt;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Investment Agreement</h1>
+        <p>This document is the executed copy of the agreement for the investment detailed below.</p>
+    </div>
+
+    <div class="summary-box">
+        <h2>Investment Summary</h2>
+        <div class="summary-grid">
+            <div class="summary-item"><strong>Agreement ID</strong> {{ .AgreementID }}</div>
+            <div class="summary-item"><strong>Loan ID</strong> {{ .LoanID }}</div>
+            <div class="summary-item"><strong>Investment Amount</strong> {{ FormatCurrency .InvestmentAmount }}</div>
+            <div class="summary-item"><strong>Interest Rate</strong> {{ .InterestRate }}%</div>
+            <div class="summary-item"><strong>Effective Date</strong> {{ FormatDate .AgreementDate}}</div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>1. Parties to the Agreement</h2>
+        <div class="parties-list">
+            <p><strong>The Investor:</strong> {{ .InvestorName }}</p>
+            <p><strong>The Borrower:</strong> {{ .BorrowerName }}</p>
+            <p><strong>The Platform:</strong> Amartha, which facilitates and services the loan.</p>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>2. Terms of Agreement</h2>
+        <div class="terms-list">
+            <ol>
+                <li><strong>The Investment:</strong> The Investor has agreed to contribute the Investment Amount to the Loan identified above, for the benefit of the Borrower.</li>
+                <li><strong>Repayment:</strong> The Borrower is obligated to repay the loan principal and interest as per the loan's repayment schedule. The Platform will process these payments and distribute the Investor's share to their account.</li>
+                <li><strong>Risk of Investment:</strong> The Investor acknowledges that this investment is not insured or guaranteed. The investment carries financial risk, including the potential for partial or total loss of principal if the Borrower defaults on their obligation.</li>
+                <li><strong>Platform Role & Fees:</strong> The Platform acts as the loan servicer. The Investor agrees that the Platform may deduct a service fee from the gross returns of the investment, as detailed in the Platform's Terms of Service.</li>
+                <li><strong>Governing Law:</strong> This agreement is governed by the laws of Indonesia.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>3. Agreement and Acceptance</h2>
+        <p>By completing the investment transaction on <strong>{{ FormatDate .AgreementDate }}</strong> via the Platform, the Investor has electronically signed and agreed to all terms and conditions outlined in this Investment Agreement and the governing Platform Terms of Service. This document serves as the final record of that binding agreement. No further signature is required.</p>
+    </div>
+
+    <div class="footer-note">
+        <p>Please retain this document for your personal records.<br>
+        If you have any questions, please contact Investor Support at support@amartha.com.</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        window.onload = function() {
+            const element = document.body;
+            var opt = {
+                margin:       10,
+                filename:     'investment_agreement_{{.LoanID}}.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        };
+    </script>
+</body>
+</html>

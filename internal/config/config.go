@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Application    ApplicationConfig
 	Postgres       PostgresConfig
+	Mail           MailConfig
 	ContextTimeout time.Duration
 }
 
@@ -16,6 +17,7 @@ type ApplicationConfig struct {
 	Name string `mapstructure:"APP_NAME"`
 	Env  string `mapstructure:"APP_ENV"`
 	Port int    `mapstructure:"APP_PORT"`
+	Url  string `mapstructure:"APP_URL"`
 }
 
 type PostgresConfig struct {
@@ -36,13 +38,23 @@ type PostgresConfig struct {
 	ConnMaxLifetime    time.Duration `mapstructure:"POSTGRES_CONN_MAX_LIFETIME"`
 }
 
+// Global config
+var APP_URL string
+
+type MailConfig struct {
+	Host     string `mapstructure:"MAIL_HOST"`
+	Port     int    `mapstructure:"MAIL_PORT"`
+	Username string `mapstructure:"MAIL_USERNAME"`
+	Password string `mapstructure:"MAIL_PASSWORD"`
+}
+
 func Load() (config Config, err error) {
 	viper.AddConfigPath("./")
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()
 
-	setConfigDefault()
+	setDefaultConfig()
 
 	if err = viper.ReadInConfig(); err != nil {
 		return
@@ -55,13 +67,18 @@ func Load() (config Config, err error) {
 	if err = viper.Unmarshal(&config.Postgres); err != nil {
 		return
 	}
+	if err = viper.Unmarshal(&config.Mail); err != nil {
+		return
+	}
 
 	config.ContextTimeout, err = time.ParseDuration(viper.GetString("CONTEXT_TIMEOUT") + "s")
+
+	APP_URL = viper.GetString("APP_URL")
 
 	return
 }
 
-func setConfigDefault() {
+func setDefaultConfig() {
 	viper.SetDefault("CONTEXT_TIMEOUT", 5)
 
 	viper.SetDefault("POSTGRES_TIMEZONE", "Asia/Jakarta")

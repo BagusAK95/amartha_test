@@ -13,6 +13,7 @@ import (
 	loanuc "github.com/BagusAK95/amarta_test/internal/application/loan/usecase"
 	"github.com/BagusAK95/amarta_test/internal/config"
 	"github.com/BagusAK95/amarta_test/internal/infrastructure/database"
+	"github.com/BagusAK95/amarta_test/internal/infrastructure/mail"
 	"github.com/BagusAK95/amarta_test/internal/presentation/rest/router"
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,8 @@ func main() {
 	dbConfig := database.SetConfig(cfg.Postgres)
 	dbConn := database.OpenConnection(cfg.Postgres, dbConfig)
 
+	mailSender := mail.NewSender(cfg.Mail)
+
 	// Initialize repository
 	employeeRepo := employeerepo.NewEmployeeRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
 	borrowerRepo := borrowerrepo.NewBorrowerRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
@@ -37,7 +40,7 @@ func main() {
 
 	// Initialize usecase
 	loanUsecase := loanuc.NewLoanUsecase(loanRepo, borrowerRepo, employeeRepo)
-	investmentUsecase := investmentuc.NewInvestmentUsecase(investmentRepo, investorRepo, loanRepo)
+	investmentUsecase := investmentuc.NewInvestmentUsecase(investmentRepo, investorRepo, loanRepo, borrowerRepo, mailSender)
 
 	// Start server
 	gin.SetMode(gin.ReleaseMode)
