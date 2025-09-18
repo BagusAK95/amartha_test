@@ -100,18 +100,12 @@ These endpoints do not require authentication.
     docker-compose up --build -d
     ```
 
-3.  **Run database migrations:**
-    Once the services are up, you need to apply database migrations. You can do this by executing the migration command inside the `app` container:
-    ```bash
-    docker-compose exec app make migration-apply DRIVER=postgres
-    ```
-
-4.  **Access the application and tools:**
-    -   The API server will be accessible at `http://localhost:8080`.
+3.  **Access the application and tools:**
+    -   The API server will be accessible at `http://localhost:8081`.
     -   Mailhog web UI: `http://localhost:8025`
     -   Jaeger web UI: `http://localhost:16686`
 
-5.  **Stop the services:**
+4.  **Stop the services:**
     To stop and remove the containers, networks, and volumes created by `docker-compose up`:
     ```bash
     docker-compose down
