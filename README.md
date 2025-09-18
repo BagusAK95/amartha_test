@@ -9,8 +9,6 @@ This project is a backend service for managing loans and investments, designed w
 -   **User Roles:** Differentiated access for Employees (Loan management) and Investors (Investment management).
 -   **Email Notifications:** Automated email notifications for investment confirmations and loan investments.
 -   **Agreement File Generation:** Generate PDF agreement files for loans and investments.
--   **Observability:** Integrated with Jaeger for distributed tracing.
--   **Database:** Uses PostgreSQL for data persistence.
 
 ## Architecture
 
