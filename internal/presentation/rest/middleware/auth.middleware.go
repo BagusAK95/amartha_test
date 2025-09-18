@@ -12,6 +12,7 @@ const (
 	RoleInvestor = "investor"
 )
 
+// Note: very basic authentication middleware
 func AuthMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		for _, role := range allowedRoles {
