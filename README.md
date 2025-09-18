@@ -1,4 +1,4 @@
-# Amartha - Code Test
+# Amartha - Coding Assessment
 
 This project is a backend service for managing loans and investments, designed with a clean architecture approach. It handles operations related to borrowers, investors, employees, loans, and investments, including email notifications and agreement file generation.
 
