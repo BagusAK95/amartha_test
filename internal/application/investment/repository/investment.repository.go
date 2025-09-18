@@ -7,6 +7,7 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/investment"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +28,9 @@ func NewInvestmentRepo(dbMaster *gorm.DB, dbSlave *gorm.DB) investment.IInvestme
 }
 
 func (r *investmentRepo) GetTotalInvestmentByLoanID(ctx context.Context, loanID uuid.UUID) (total float64, err error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "investmentRepo.GetTotalInvestmentByLoanID")
+	defer span.Finish()
+
 	var model investment.Investment
 
 	builder := sq.

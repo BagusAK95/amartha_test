@@ -9,6 +9,7 @@ import (
 
 type EntityModel interface {
 	TableName() string
+	TracerName() string
 }
 
 type BaseModel struct {

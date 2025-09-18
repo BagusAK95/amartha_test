@@ -10,6 +10,7 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 )
 
 type loanUsecase struct {
@@ -27,6 +28,9 @@ func NewLoanUsecase(loanRepo loan.ILoanRepository, borrowerRepo borrower.IBorrow
 }
 
 func (u *loanUsecase) CreateLoan(ctx context.Context, req loan.CreateLoanRequest) (*loan.Loan, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.CreateLoan")
+	defer span.Finish()
+
 	borrower, err := u.borrowerRepo.GetByID(ctx, req.BorrowerID)
 	if err != nil {
 		return nil, err
@@ -50,6 +54,9 @@ func (u *loanUsecase) CreateLoan(ctx context.Context, req loan.CreateLoanRequest
 }
 
 func (u *loanUsecase) RejectLoan(ctx context.Context, loanID uuid.UUID, rejectReason string) (*loan.Loan, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.RejectLoan")
+	defer span.Finish()
+
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
 		return nil, err
@@ -71,6 +78,9 @@ func (u *loanUsecase) RejectLoan(ctx context.Context, loanID uuid.UUID, rejectRe
 }
 
 func (u *loanUsecase) ApproveLoan(ctx context.Context, loanID uuid.UUID, req loan.ApproveLoanRequest) (*loan.Loan, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.ApproveLoan")
+	defer span.Finish()
+
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
 		return nil, err
@@ -101,6 +111,9 @@ func (u *loanUsecase) ApproveLoan(ctx context.Context, loanID uuid.UUID, req loa
 }
 
 func (u *loanUsecase) DisburseLoan(ctx context.Context, loanID uuid.UUID, req loan.DisburseLoanRequest) (*loan.Loan, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.DisburseLoan")
+	defer span.Finish()
+
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
 		return nil, err
@@ -131,6 +144,9 @@ func (u *loanUsecase) DisburseLoan(ctx context.Context, loanID uuid.UUID, req lo
 }
 
 func (u *loanUsecase) DetailLoan(ctx context.Context, loanID uuid.UUID) (*loan.Loan, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.DetailLoan")
+	defer span.Finish()
+
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
 		return nil, err
@@ -142,6 +158,9 @@ func (u *loanUsecase) DetailLoan(ctx context.Context, loanID uuid.UUID) (*loan.L
 }
 
 func (u *loanUsecase) ListLoan(ctx context.Context, state *string, page int, limit int) (repository.Pagination[loan.Loan], error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.ListLoan")
+	defer span.Finish()
+
 	filter := map[string]any{}
 	if state != nil {
 		filter["state"] = *state
@@ -156,6 +175,9 @@ func (u *loanUsecase) ListLoan(ctx context.Context, state *string, page int, lim
 }
 
 func (u *loanUsecase) GetLoanAgreementDetail(ctx context.Context, loanID uuid.UUID) (*loan.LoanAgreementResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.GetLoanAgreementDetail")
+	defer span.Finish()
+
 	loanData, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
 		return nil, err

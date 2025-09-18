@@ -13,6 +13,7 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/infrastructure/bus"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"gorm.io/gorm"
 )
 
@@ -35,7 +36,11 @@ func NewInvestmentUsecase(investmentRepo investment.IInvestmentRepository, inves
 }
 
 func (u *investmentUsecase) AddInvestment(ctx context.Context, investorID uuid.UUID, req investment.CreateInvestmentRequest) (res *investment.Investment, err error) {
-	// TODO: Context timeout
+	span, ctx := opentracing.StartSpanFromContext(ctx, "investmentUsecase.AddInvestment")
+	defer span.Finish()
+
+	ctx, cancel := context.WithTimeout(ctx, config.CONTEXT_TIMEOUT)
+	defer cancel()
 
 	trx := u.investmentRepo.BeginTransaction(ctx)
 	defer func() {
@@ -154,6 +159,9 @@ func (u *investmentUsecase) checkLoanInvested(ctx context.Context, validLoan loa
 }
 
 func (u *investmentUsecase) GetInvestmentAgreementDetail(ctx context.Context, investmentID uuid.UUID) (*investment.InvestmentAgreementResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "investmentUsecase.GetInvestmentAgreementDetail")
+	defer span.Finish()
+
 	inv, err := u.investmentRepo.GetByID(ctx, investmentID)
 	if err != nil {
 		return nil, err

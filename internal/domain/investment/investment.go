@@ -15,3 +15,7 @@ type Investment struct {
 func (Investment) TableName() string {
 	return "investments"
 }
+
+func (e Investment) TracerName() string {
+	return "investmentRepo"
+}

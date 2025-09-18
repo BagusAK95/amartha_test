@@ -7,10 +7,12 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
 	"github.com/BagusAK95/amarta_test/internal/presentation/rest/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
 )
 
-func NewRouter(loanUsecase loan.ILoanUsecase, investmentUsecase investment.IInvestmentUsecase) *gin.Engine {
+func NewRouter(loanUsecase loan.ILoanUsecase, investmentUsecase investment.IInvestmentUsecase, tracer opentracing.Tracer) *gin.Engine {
 	router := gin.Default()
+	router.Use(middleware.TracingMiddleware(tracer))
 	router.Use(middleware.ErrorHandler())
 
 	loanHandler := loanhttp.NewLoanHandler(loanUsecase)

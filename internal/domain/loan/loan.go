@@ -24,6 +24,10 @@ func (Loan) TableName() string {
 	return "loans"
 }
 
+func (e Loan) TracerName() string {
+	return "loanRepo"
+}
+
 type State string
 
 const (

@@ -13,3 +13,7 @@ type Employee struct {
 func (Employee) TableName() string {
 	return "employees"
 }
+
+func (e Employee) TracerName() string {
+	return "employeeRepo"
+}

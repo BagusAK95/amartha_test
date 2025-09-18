@@ -7,10 +7,10 @@ import (
 )
 
 type Config struct {
-	Application    ApplicationConfig
-	Postgres       PostgresConfig
-	Mail           MailConfig
-	ContextTimeout time.Duration
+	Application ApplicationConfig
+	Postgres    PostgresConfig
+	Mail        MailConfig
+	Jaeger      JaegerConfig
 }
 
 type ApplicationConfig struct {
@@ -40,12 +40,19 @@ type PostgresConfig struct {
 
 // Global config
 var APP_URL string
+var CONTEXT_TIMEOUT time.Duration
 
 type MailConfig struct {
 	Host     string `mapstructure:"MAIL_HOST"`
 	Port     int    `mapstructure:"MAIL_PORT"`
 	Username string `mapstructure:"MAIL_USERNAME"`
 	Password string `mapstructure:"MAIL_PASSWORD"`
+}
+
+type JaegerConfig struct {
+	Host        string `mapstructure:"JAEGER_HOST"`
+	Port        int    `mapstructure:"JAEGER_PORT"`
+	ServiceName string `mapstructure:"JAEGER_SERVICE_NAME"`
 }
 
 func Load() (config Config, err error) {
@@ -70,9 +77,11 @@ func Load() (config Config, err error) {
 	if err = viper.Unmarshal(&config.Mail); err != nil {
 		return
 	}
+	if err = viper.Unmarshal(&config.Jaeger); err != nil {
+		return
+	}
 
-	config.ContextTimeout, err = time.ParseDuration(viper.GetString("CONTEXT_TIMEOUT") + "s")
-
+	CONTEXT_TIMEOUT, err = time.ParseDuration(viper.GetString("CONTEXT_TIMEOUT") + "s")
 	APP_URL = viper.GetString("APP_URL")
 
 	return

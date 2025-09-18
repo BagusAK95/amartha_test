@@ -17,9 +17,11 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/infrastructure/bus"
 	"github.com/BagusAK95/amarta_test/internal/infrastructure/database"
 	mailsender "github.com/BagusAK95/amarta_test/internal/infrastructure/mail"
+	"github.com/BagusAK95/amarta_test/internal/infrastructure/tracer"
 	buslistener "github.com/BagusAK95/amarta_test/internal/presentation/messaging/bus"
 	"github.com/BagusAK95/amarta_test/internal/presentation/rest/router"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
 )
 
 func main() {
@@ -32,6 +34,11 @@ func main() {
 	// Open database connection
 	dbConfig := database.SetConfig(cfg.Postgres)
 	dbConn := database.OpenConnection(cfg.Postgres, dbConfig)
+
+	// Jaeger
+	tracer, closer := tracer.Init(cfg.Jaeger)
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 
 	// Mail server
 	mailSender := mailsender.NewSender(cfg.Mail)
@@ -54,7 +61,7 @@ func main() {
 
 	// Start server
 	gin.SetMode(gin.ReleaseMode)
-	r := router.NewRouter(loanUsecase, investmentUsecase)
+	r := router.NewRouter(loanUsecase, investmentUsecase, tracer)
 
 	serverAddr := fmt.Sprintf(":%d", cfg.Application.Port)
 	log.Printf("🚀 Starting server on %s", serverAddr)
