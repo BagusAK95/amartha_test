@@ -7,17 +7,20 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/BagusAK95/amarta_test/internal/utils/html"
+	"github.com/BagusAK95/amarta_test/internal/utils/validator"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type loanHandler struct {
-	usecase loan.ILoanUsecase
+	usecase   loan.ILoanUsecase
+	validator *validator.CustomValidator
 }
 
 func NewLoanHandler(usecase loan.ILoanUsecase) *loanHandler {
 	return &loanHandler{
-		usecase: usecase,
+		usecase:   usecase,
+		validator: validator.NewValidator(),
 	}
 }
 
@@ -25,6 +28,11 @@ func (h *loanHandler) CreateLoan(c *gin.Context) {
 	var body loan.CreateLoanRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
 		_ = c.Error(httpError.NewBadRequestError(err.Error()))
+		return
+	}
+
+	if errs := h.validator.Validate(body); len(errs) > 0 {
+		_ = c.Error(httpError.NewBadRequestError("invalid request body", errs...))
 		return
 	}
 
@@ -50,6 +58,11 @@ func (h *loanHandler) RejectLoan(c *gin.Context) {
 		return
 	}
 
+	if errs := h.validator.Validate(body); len(errs) > 0 {
+		_ = c.Error(httpError.NewBadRequestError("invalid request body", errs...))
+		return
+	}
+
 	res, err := h.usecase.RejectLoan(c.Request.Context(), loanID, body.RejectReason)
 	if err != nil {
 		_ = c.Error(err)
@@ -72,6 +85,11 @@ func (h *loanHandler) ApproveLoan(c *gin.Context) {
 		return
 	}
 
+	if errs := h.validator.Validate(body); len(errs) > 0 {
+		_ = c.Error(httpError.NewBadRequestError("invalid request body", errs...))
+		return
+	}
+
 	res, err := h.usecase.ApproveLoan(c.Request.Context(), loanID, body)
 	if err != nil {
 		_ = c.Error(err)
@@ -91,6 +109,11 @@ func (h *loanHandler) DisburseLoan(c *gin.Context) {
 	var body loan.DisburseLoanRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
 		_ = c.Error(httpError.NewBadRequestError(err.Error()))
+		return
+	}
+
+	if errs := h.validator.Validate(body); len(errs) > 0 {
+		_ = c.Error(httpError.NewBadRequestError("invalid request body", errs...))
 		return
 	}
 
@@ -159,7 +182,7 @@ func (h *loanHandler) GetLoanAgreementFile(c *gin.Context) {
 
 	tmpl, err := html.NewTemplate()
 	if err != nil {
-		_ = c.Error(httpError.NewInternalError("failed to load template"))
+		_ = c.Error(httpError.NewInternalServerError("failed to load template"))
 		return
 	}
 
@@ -168,7 +191,7 @@ func (h *loanHandler) GetLoanAgreementFile(c *gin.Context) {
 
 	err = tmpl.Execute(c.Writer, "loan_agreement.html", agreementDetail)
 	if err != nil {
-		_ = c.Error(httpError.NewInternalError("failed to render template"))
+		_ = c.Error(httpError.NewInternalServerError("failed to render template"))
 		return
 	}
 }

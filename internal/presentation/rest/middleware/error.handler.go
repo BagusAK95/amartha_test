@@ -16,13 +16,29 @@ func ErrorHandler() gin.HandlerFunc {
 
 			switch e := err.(type) {
 			case *error.NotFoundError:
-				c.JSON(http.StatusNotFound, gin.H{"message": e.Error()})
+				res := gin.H{"message": e.Error()}
+				if len(e.Errors) > 0 {
+					res["errors"] = e.Errors
+				}
+				c.JSON(http.StatusNotFound, res)
 			case *error.ForbiddenError:
-				c.JSON(http.StatusForbidden, gin.H{"message": e.Error()})
+				res := gin.H{"message": e.Error()}
+				if len(e.Errors) > 0 {
+					res["errors"] = e.Errors
+				}
+				c.JSON(http.StatusNotFound, res)
 			case *error.BadRequestError:
-				c.JSON(http.StatusBadRequest, gin.H{"message": e.Error()})
-			case *error.InternalError:
-				c.JSON(http.StatusInternalServerError, gin.H{"message": e.Error()})
+				res := gin.H{"message": e.Error()}
+				if len(e.Errors) > 0 {
+					res["errors"] = e.Errors
+				}
+				c.JSON(http.StatusNotFound, res)
+			case *error.InternalServerError:
+				res := gin.H{"message": e.Error()}
+				if len(e.Errors) > 0 {
+					res["errors"] = e.Errors
+				}
+				c.JSON(http.StatusNotFound, res)
 			default:
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "An unexpected error occurred"})
 			}

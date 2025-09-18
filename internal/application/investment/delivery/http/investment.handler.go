@@ -6,17 +6,20 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/investment"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/BagusAK95/amarta_test/internal/utils/html"
+	"github.com/BagusAK95/amarta_test/internal/utils/validator"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type investmentHandler struct {
-	usecase investment.IInvestmentUsecase
+	usecase   investment.IInvestmentUsecase
+	validator *validator.CustomValidator
 }
 
 func NewInvestmentHandler(usecase investment.IInvestmentUsecase) *investmentHandler {
 	return &investmentHandler{
-		usecase: usecase,
+		usecase:   usecase,
+		validator: validator.NewValidator(),
 	}
 }
 
@@ -24,6 +27,11 @@ func (h *investmentHandler) AddInvestment(c *gin.Context) {
 	var body investment.CreateInvestmentRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
 		_ = c.Error(httpError.NewBadRequestError(err.Error()))
+		return
+	}
+
+	if errs := h.validator.Validate(body); len(errs) > 0 {
+		_ = c.Error(httpError.NewBadRequestError("invalid request body", errs...))
 		return
 	}
 
@@ -53,7 +61,7 @@ func (h *investmentHandler) GetInvestmentAgreementFile(c *gin.Context) {
 
 	tmpl, err := html.NewTemplate()
 	if err != nil {
-		_ = c.Error(httpError.NewInternalError("failed to load template"))
+		_ = c.Error(httpError.NewInternalServerError("failed to load template"))
 		return
 	}
 
@@ -62,7 +70,7 @@ func (h *investmentHandler) GetInvestmentAgreementFile(c *gin.Context) {
 
 	err = tmpl.Execute(c.Writer, "investment_agreement.html", agreementDetail)
 	if err != nil {
-		_ = c.Error(httpError.NewInternalError("failed to render template"))
+		_ = c.Error(httpError.NewInternalServerError("failed to render template"))
 		return
 	}
 }

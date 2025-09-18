@@ -7,20 +7,20 @@ import (
 )
 
 type CreateLoanRequest struct {
-	BorrowerID         uuid.UUID `json:"borrower_id" binding:"required"`
-	PrincipalAmount    float64   `json:"principal_amount" binding:"required"`
-	Rate               float32   `json:"rate" binding:"required"`
-	ROI                float32   `json:"roi" binding:"required"`
-	AgreementLetterURL string    `json:"agreement_letter_url" binding:"required"`
+	BorrowerID         uuid.UUID `json:"borrower_id" validate:"required"`
+	PrincipalAmount    float64   `json:"principal_amount" validate:"required,min=1"`
+	Rate               float32   `json:"rate" validate:"required,min=0"`
+	ROI                float32   `json:"roi" validate:"required,min=0"`
+	AgreementLetterURL string    `json:"agreement_letter_url" validate:"required,url"`
 }
 
 type RejectLoanRequest struct {
-	RejectReason string `json:"reject_reason" binding:"required"`
+	RejectReason string `json:"reject_reason" validate:"required"`
 }
 
 type ApproveLoanRequest struct {
-	ValidatorEmployeeID  uuid.UUID `json:"validator_employee_id" binding:"required"`
-	VisitProofPictureURL string    `json:"visit_proof_picture_url" binding:"required"`
+	ValidatorEmployeeID  uuid.UUID `json:"validator_employee_id" validate:"required"`
+	VisitProofPictureURL string    `json:"visit_proof_picture_url" validate:"required,url"`
 }
 
 type LoanAgreementResponse struct {
@@ -31,7 +31,7 @@ type LoanAgreementResponse struct {
 }
 
 type DisburseLoanRequest struct {
-	SignedAgreementURL string    `json:"signed_agreement_url" binding:"required"`
-	OfficerEmployeeID  uuid.UUID `json:"officer_employee_id" binding:"required"`
-	DisbursementDate   time.Time `json:"disbursement_date" binding:"required"`
+	SignedAgreementURL string    `json:"signed_agreement_url" validate:"required,url"`
+	OfficerEmployeeID  uuid.UUID `json:"officer_employee_id" validate:"required"`
+	DisbursementDate   time.Time `json:"disbursement_date" validate:"required"`
 }

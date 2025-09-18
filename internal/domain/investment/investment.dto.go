@@ -7,8 +7,8 @@ import (
 )
 
 type CreateInvestmentRequest struct {
-	LoanID uuid.UUID `json:"loan_id"`
-	Amount float64   `json:"amount"`
+	LoanID uuid.UUID `json:"loan_id" validate:"required"`
+	Amount float64   `json:"amount" validate:"required,min=1"`
 }
 
 type InvestmentAgreementResponse struct {
