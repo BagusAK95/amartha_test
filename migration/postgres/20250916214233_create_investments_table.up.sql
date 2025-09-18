@@ -9,3 +9,4 @@ CREATE TABLE investments (
 );
 
 CREATE INDEX idx_investments_loan_id ON investments(loan_id);
+CREATE INDEX idx_investments_investor_id ON investments(investor_id);

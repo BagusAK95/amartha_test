@@ -21,3 +21,8 @@ CREATE TABLE loans (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
 );
+
+CREATE INDEX idx_loans_borrower_id ON loans(borrower_id);
+CREATE INDEX idx_loans_state ON loans(state);
+CREATE INDEX idx_loans_approval_date ON loans(approval_date);
+CREATE INDEX idx_loans_disbursement_date ON loans(disbursement_date);
