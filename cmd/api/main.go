@@ -11,9 +11,13 @@ import (
 	investorrepo "github.com/BagusAK95/amarta_test/internal/application/investor/repository"
 	loanrepo "github.com/BagusAK95/amarta_test/internal/application/loan/repository"
 	loanuc "github.com/BagusAK95/amarta_test/internal/application/loan/usecase"
+	mailuc "github.com/BagusAK95/amarta_test/internal/application/mail/usecase"
 	"github.com/BagusAK95/amarta_test/internal/config"
+	"github.com/BagusAK95/amarta_test/internal/domain/mail"
+	"github.com/BagusAK95/amarta_test/internal/infrastructure/bus"
 	"github.com/BagusAK95/amarta_test/internal/infrastructure/database"
-	"github.com/BagusAK95/amarta_test/internal/infrastructure/mail"
+	mailsender "github.com/BagusAK95/amarta_test/internal/infrastructure/mail"
+	buslistener "github.com/BagusAK95/amarta_test/internal/presentation/messaging/bus"
 	"github.com/BagusAK95/amarta_test/internal/presentation/rest/router"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +33,9 @@ func main() {
 	dbConfig := database.SetConfig(cfg.Postgres)
 	dbConn := database.OpenConnection(cfg.Postgres, dbConfig)
 
-	mailSender := mail.NewSender(cfg.Mail)
+	// Mail server
+	mailSender := mailsender.NewSender(cfg.Mail)
+	mailBus := bus.NewBus[mail.MailSendRequest]()
 
 	// Initialize repository
 	employeeRepo := employeerepo.NewEmployeeRepo(dbConn.Postgres.Master, dbConn.Postgres.Slave)
@@ -40,7 +46,11 @@ func main() {
 
 	// Initialize usecase
 	loanUsecase := loanuc.NewLoanUsecase(loanRepo, borrowerRepo, employeeRepo)
-	investmentUsecase := investmentuc.NewInvestmentUsecase(investmentRepo, investorRepo, loanRepo, borrowerRepo, mailSender)
+	investmentUsecase := investmentuc.NewInvestmentUsecase(investmentRepo, investorRepo, loanRepo, borrowerRepo, mailBus)
+	mailUsecase := mailuc.NewMailUsecase(mailSender)
+
+	// Bus listener
+	buslistener.NewBusListener(mailBus, mailUsecase)
 
 	// Start server
 	gin.SetMode(gin.ReleaseMode)

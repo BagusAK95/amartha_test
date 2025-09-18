@@ -9,7 +9,8 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/investment"
 	"github.com/BagusAK95/amarta_test/internal/domain/investor"
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
-	"github.com/BagusAK95/amarta_test/internal/infrastructure/mail"
+	"github.com/BagusAK95/amarta_test/internal/domain/mail"
+	"github.com/BagusAK95/amarta_test/internal/infrastructure/bus"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -20,16 +21,16 @@ type investmentUsecase struct {
 	investorRepo   investor.IInvestorRepository
 	loanRepo       loan.ILoanRepository
 	borrowerRepo   borrower.IBorrowerRepository
-	mailSender     *mail.Sender
+	mailBus        bus.Bus[mail.MailSendRequest]
 }
 
-func NewInvestmentUsecase(investmentRepo investment.IInvestmentRepository, investorRepo investor.IInvestorRepository, loanRepo loan.ILoanRepository, borrowerRepo borrower.IBorrowerRepository, mailSender *mail.Sender) investment.IInvestmentUsecase {
+func NewInvestmentUsecase(investmentRepo investment.IInvestmentRepository, investorRepo investor.IInvestorRepository, loanRepo loan.ILoanRepository, borrowerRepo borrower.IBorrowerRepository, mailBus bus.Bus[mail.MailSendRequest]) investment.IInvestmentUsecase {
 	return &investmentUsecase{
 		investmentRepo: investmentRepo,
 		investorRepo:   investorRepo,
 		loanRepo:       loanRepo,
 		borrowerRepo:   borrowerRepo,
-		mailSender:     mailSender,
+		mailBus:        mailBus,
 	}
 }
 
@@ -95,17 +96,23 @@ func (u *investmentUsecase) AddInvestment(ctx context.Context, investorID uuid.U
 		return nil, err
 	}
 
-	// TODO: Async process
-	u.mailSender.SendEmailWithTemplate(validInvestor.Email, "Your Investment is Confirmed", "investment_confirmed.html", map[string]any{
-		"InvestmentID":     newInvestment.ID.String(),
-		"LoanID":           validLoan.ID.String(),
-		"InvestorName":     validInvestor.FullName,
-		"InvestmentAmount": req.Amount,
-		"ROI":              validLoan.ROI,
-		"AgreementDate":    newInvestment.CreatedAt,
-		"AppUrl":           config.APP_URL,
-		"Year":             time.Now().Year(),
-	})
+	mailRequest := mail.MailSendRequest{
+		To:       validInvestor.Email,
+		Subject:  "Your Investment is Confirmed",
+		Template: "investment_confirmed.html",
+		Data: map[string]any{
+			"InvestmentID":     newInvestment.ID.String(),
+			"LoanID":           validLoan.ID.String(),
+			"InvestorName":     validInvestor.FullName,
+			"InvestmentAmount": req.Amount,
+			"ROI":              validLoan.ROI,
+			"AgreementDate":    newInvestment.CreatedAt,
+			"AppUrl":           config.APP_URL,
+			"Year":             time.Now().Year(),
+		},
+	}
+
+	u.mailBus.Publish("mail.send", mailRequest)
 
 	return &newInvestment, nil
 }
@@ -127,15 +134,21 @@ func (u *investmentUsecase) checkLoanInvested(ctx context.Context, validLoan loa
 		return err
 	}
 
-	// TODO: Async process
-	u.mailSender.SendEmailWithTemplate(validBorrower.Email, "Your Loan Has Been Funded", "loan_invested.html", map[string]any{
-		"BorrowerName": validBorrower.FullName,
-		"LoanID":       validLoan.ID.String(),
-		"LoanAmount":   validLoan.PrincipalAmount,
-		"InterestRate": validLoan.Rate,
-		"AppUrl":       config.APP_URL,
-		"Year":         time.Now().Year(),
-	})
+	mailRequest := mail.MailSendRequest{
+		To:       validBorrower.Email,
+		Subject:  "Your Loan Has Been Funded",
+		Template: "loan_invested.html",
+		Data: map[string]any{
+			"BorrowerName": validBorrower.FullName,
+			"LoanID":       validLoan.ID.String(),
+			"LoanAmount":   validLoan.PrincipalAmount,
+			"InterestRate": validLoan.Rate,
+			"AppUrl":       config.APP_URL,
+			"Year":         time.Now().Year(),
+		},
+	}
+
+	u.mailBus.Publish("mail.send", mailRequest)
 
 	return nil
 }
