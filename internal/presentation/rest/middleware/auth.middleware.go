@@ -24,7 +24,7 @@ func AuthMiddleware(allowedRoles ...string) gin.HandlerFunc {
 				if userIDHeader != "" {
 					userID, err := uuid.Parse(userIDHeader)
 					if err != nil {
-						c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid x-employee-id header"})
+						c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "invalid x-employee-id header"})
 						return
 					}
 					c.Set("employeeID", userID)
@@ -36,7 +36,7 @@ func AuthMiddleware(allowedRoles ...string) gin.HandlerFunc {
 				if userIDHeader != "" {
 					userID, err := uuid.Parse(userIDHeader)
 					if err != nil {
-						c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "invalid x-investor-id header"})
+						c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "invalid x-investor-id header"})
 						return
 					}
 					c.Set("investorID", userID)
@@ -46,6 +46,6 @@ func AuthMiddleware(allowedRoles ...string) gin.HandlerFunc {
 			}
 		}
 
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "missing required role header"})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "missing required role header"})
 	}
 }
