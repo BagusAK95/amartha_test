@@ -39,6 +39,7 @@ The project is built with Go and utilizes several key libraries:
 -   **`gopkg.in/gomail.v2`**: For sending emails.
 -   **`github.com/Masterminds/squirrel`**: SQL query builder.
 -   **`github.com/google/uuid`**: For generating UUIDs.
+-   **`github.com/go-playground/validator/v10`**: For request validation.
 
 ## API Endpoints
 
@@ -83,6 +84,10 @@ These endpoints do not require authentication.
     -   **Description:** Retrieves the loan agreement file for a given loan ID.
 -   **`GET /api/v1/investment/agreement/file/:investment_id`**
     -   **Description:** Retrieves the investment agreement file for a given investment ID.
+
+## API Documentation
+
+Detailed API documentation can be found on Postman: [https://documenter.getpostman.com/view/3187497/2sB3HrnHwc](https://documenter.getpostman.com/view/3187497/2sB3HrnHwc)
 
 ## Requirements
 
@@ -157,12 +162,3 @@ The project uses `golang-migrate` for managing database migrations.
 -   `make migration-apply DRIVER=postgres`: Applies all pending migrations.
 -   `make migration-rollback DRIVER=postgres`: Rolls back the last applied migration.
 -   `make migration-create DRIVER=postgres NAME=<migration_name>`: Creates new up/down migration files.
-
-## Testing
-
-(Currently, there are no explicit test commands in the `Makefile` or obvious test files in the provided structure. This section is a placeholder.)
-
-To run tests (if available):
-```bash
-go test ./...
-```
