@@ -6,8 +6,11 @@ import (
 
 	"github.com/BagusAK95/amarta_test/internal/domain/mail"
 	mailsender "github.com/BagusAK95/amarta_test/internal/infrastructure/mail"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel"
 )
+
+var tracerName = "MailUsecase"
+var tracer = otel.Tracer(tracerName)
 
 type mailUsecase struct {
 	mailSender mailsender.ISender
@@ -20,8 +23,8 @@ func NewMailUsecase(mailSender mailsender.ISender) mail.IMailUsecase {
 }
 
 func (u *mailUsecase) Send(ctx context.Context, req mail.MailSendRequest) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "mailUsecase.Send")
-	defer span.Finish()
+	_, span := tracer.Start(ctx, tracerName+".Send")
+	defer span.End()
 
 	log.Printf("✉️ Receiving mail.send message: %s", req.To)
 

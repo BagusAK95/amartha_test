@@ -4,42 +4,38 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func TracingMiddleware(tracer opentracing.Tracer) gin.HandlerFunc {
+func TracingMiddleware(tracer trace.Tracer) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		spanCtx, _ := tracer.Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(c.Request.Header))
+		ctx := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}).Extract(c.Request.Context(), propagation.HeaderCarrier(c.Request.Header))
 
-		span := tracer.StartSpan(
-			fmt.Sprintf("%s %s", c.Request.Method, c.Request.URL.Path),
-			ext.RPCServerOption(spanCtx),
+		ctx, span := tracer.Start(ctx, fmt.Sprintf("%s %s", c.Request.Method, c.Request.URL.Path), trace.WithSpanKind(trace.SpanKindServer))
+		defer span.End()
+
+		span.SetAttributes(
+			attribute.String("http.method", c.Request.Method),
+			attribute.String("http.url", c.Request.URL.EscapedPath()),
 		)
 
-		ext.HTTPMethod.Set(span, c.Request.Method)
-		ext.HTTPUrl.Set(span, c.Request.URL.EscapedPath())
-
-		c.Request = c.Request.WithContext(opentracing.ContextWithSpan(c.Request.Context(), span))
+		c.Request = c.Request.WithContext(ctx)
 
 		defer func() {
 			status := c.Writer.Status()
-			ext.HTTPStatusCode.Set(span, uint16(status))
+			span.SetAttributes(attribute.Int("http.status_code", status))
 
+			err := c.Errors.Last().Err
 			if status >= 500 && status <= 599 {
-				ext.Error.Set(span, true)
+				span.SetStatus(codes.Error, err.Error())
 			}
 
 			if status >= 400 && status <= 599 && len(c.Errors) > 0 {
-				err := c.Errors.Last().Err
-				span.LogKV(
-					"event", "error",
-					"message", err.Error(),
-					"error.kind", fmt.Sprintf("%T", err),
-				)
+				span.RecordError(err)
 			}
-
-			span.Finish()
 		}()
 
 		c.Next()

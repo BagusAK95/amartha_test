@@ -10,8 +10,11 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/loan"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel"
 )
+
+var tracerName = "LoanUsecase"
+var tracer = otel.Tracer(tracerName)
 
 type loanUsecase struct {
 	loanRepo     loan.ILoanRepository
@@ -28,8 +31,8 @@ func NewLoanUsecase(loanRepo loan.ILoanRepository, borrowerRepo borrower.IBorrow
 }
 
 func (u *loanUsecase) CreateLoan(ctx context.Context, req loan.CreateLoanRequest) (*loan.Loan, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.CreateLoan")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".CreateLoan")
+	defer span.End()
 
 	borrower, err := u.borrowerRepo.GetByID(ctx, req.BorrowerID)
 	if err != nil {
@@ -54,8 +57,8 @@ func (u *loanUsecase) CreateLoan(ctx context.Context, req loan.CreateLoanRequest
 }
 
 func (u *loanUsecase) RejectLoan(ctx context.Context, loanID uuid.UUID, rejectReason string) (*loan.Loan, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.RejectLoan")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".RejectLoan")
+	defer span.End()
 
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
@@ -78,8 +81,8 @@ func (u *loanUsecase) RejectLoan(ctx context.Context, loanID uuid.UUID, rejectRe
 }
 
 func (u *loanUsecase) ApproveLoan(ctx context.Context, loanID uuid.UUID, req loan.ApproveLoanRequest) (*loan.Loan, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.ApproveLoan")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".ApproveLoan")
+	defer span.End()
 
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
@@ -111,8 +114,8 @@ func (u *loanUsecase) ApproveLoan(ctx context.Context, loanID uuid.UUID, req loa
 }
 
 func (u *loanUsecase) DisburseLoan(ctx context.Context, loanID uuid.UUID, req loan.DisburseLoanRequest) (*loan.Loan, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.DisburseLoan")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".DisburseLoan")
+	defer span.End()
 
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
@@ -144,8 +147,8 @@ func (u *loanUsecase) DisburseLoan(ctx context.Context, loanID uuid.UUID, req lo
 }
 
 func (u *loanUsecase) DetailLoan(ctx context.Context, loanID uuid.UUID) (*loan.Loan, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.DetailLoan")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".DetailLoan")
+	defer span.End()
 
 	validLoan, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {
@@ -158,8 +161,8 @@ func (u *loanUsecase) DetailLoan(ctx context.Context, loanID uuid.UUID) (*loan.L
 }
 
 func (u *loanUsecase) ListLoan(ctx context.Context, state *string, page int, limit int) (repository.Pagination[loan.Loan], error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.ListLoan")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".ListLoan")
+	defer span.End()
 
 	filter := map[string]any{}
 	if state != nil {
@@ -175,8 +178,8 @@ func (u *loanUsecase) ListLoan(ctx context.Context, state *string, page int, lim
 }
 
 func (u *loanUsecase) GetLoanAgreementDetail(ctx context.Context, loanID uuid.UUID) (*loan.LoanAgreementResponse, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "loanUsecase.GetLoanAgreementDetail")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".GetLoanAgreementDetail")
+	defer span.End()
 
 	loanData, err := u.loanRepo.GetByID(ctx, loanID)
 	if err != nil {

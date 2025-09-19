@@ -17,7 +17,3 @@ type Borrower struct {
 func (Borrower) TableName() string {
 	return "borrowers"
 }
-
-func (e Borrower) TracerName() string {
-	return "borrowerRepo"
-}

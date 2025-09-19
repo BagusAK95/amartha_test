@@ -27,7 +27,7 @@ import (
 	buslistener "github.com/BagusAK95/amarta_test/internal/presentation/messaging/bus"
 	"github.com/BagusAK95/amarta_test/internal/presentation/rest/router"
 	"github.com/gin-gonic/gin"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel"
 )
 
 func main() {
@@ -42,9 +42,7 @@ func main() {
 	dbConn := database.OpenConnection(cfg.Postgres, dbConfig)
 
 	// Jaeger
-	tracer, closer := tracer.Init(cfg.Jaeger)
-	defer closer.Close()
-	opentracing.SetGlobalTracer(tracer)
+	tracer := tracer.Init(cfg.Jaeger)
 
 	// Mail server
 	mailSender := mailsender.NewSender(cfg.Mail)
@@ -68,7 +66,7 @@ func main() {
 	// Start server
 	gin.SetMode(gin.ReleaseMode)
 
-	r := router.NewRouter(loanUsecase, investmentUsecase, tracer)
+	r := router.NewRouter(loanUsecase, investmentUsecase, otel.Tracer("GinServer"))
 	addr := fmt.Sprintf(":%d", cfg.Application.Port)
 
 	srv := &http.Server{
@@ -91,6 +89,7 @@ func main() {
 
 	// Close connection
 	database.CloseConnection(dbConn)
+	tracer.Shutdown(context.Background())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

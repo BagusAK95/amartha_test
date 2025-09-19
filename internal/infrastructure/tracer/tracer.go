@@ -1,32 +1,52 @@
 package tracer
 
 import (
+	"context"
 	"fmt"
-	"io"
+	"time"
 
 	"github.com/BagusAK95/amarta_test/internal/config"
-	"github.com/opentracing/opentracing-go"
-	"github.com/uber/jaeger-client-go"
-	jaegercfg "github.com/uber/jaeger-client-go/config"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func Init(cfg config.JaegerConfig) (opentracing.Tracer, io.Closer) {
-	cfgSource := &jaegercfg.Configuration{
-		ServiceName: cfg.ServiceName,
-		Sampler: &jaegercfg.SamplerConfig{
-			Type:  jaeger.SamplerTypeConst,
-			Param: 1,
-		},
-		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans:           true,
-			LocalAgentHostPort: fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
-		},
+func Init(cfg config.JaegerConfig) *trace.TracerProvider {
+	headers := map[string]string{
+		"content-type": "application/json",
 	}
 
-	tracer, closer, err := cfgSource.NewTracer()
+	exporter, err := otlptrace.New(
+		context.Background(),
+		otlptracehttp.NewClient(
+			otlptracehttp.WithEndpoint(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)),
+			otlptracehttp.WithHeaders(headers),
+			otlptracehttp.WithInsecure(),
+		),
+	)
 	if err != nil {
-		panic(fmt.Sprintf("cannot create new tracer: %v", err))
+		panic("error creating new exporter")
 	}
 
-	return tracer, closer
+	provider := trace.NewTracerProvider(
+		trace.WithBatcher(
+			exporter,
+			trace.WithMaxExportBatchSize(trace.DefaultMaxExportBatchSize),
+			trace.WithBatchTimeout(trace.DefaultScheduleDelay*time.Millisecond),
+			trace.WithMaxExportBatchSize(trace.DefaultMaxExportBatchSize),
+		),
+		trace.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				semconv.ServiceNameKey.String(cfg.ServiceName),
+			),
+		),
+	)
+
+	otel.SetTracerProvider(provider)
+
+	return provider
 }

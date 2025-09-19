@@ -7,9 +7,12 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/domain/investment"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel"
 	"gorm.io/gorm"
 )
+
+var tracerName = "InvestmentRepository"
+var tracer = otel.Tracer(tracerName)
 
 type investmentRepo struct {
 	repository.BaseRepo[investment.Investment]
@@ -28,8 +31,8 @@ func NewInvestmentRepo(dbMaster *gorm.DB, dbSlave *gorm.DB) investment.IInvestme
 }
 
 func (r *investmentRepo) GetTotalInvestmentByLoanID(ctx context.Context, loanID uuid.UUID) (total float64, err error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "investmentRepo.GetTotalInvestmentByLoanID")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".GetTotalInvestmentByLoanID")
+	defer span.End()
 
 	var model investment.Investment
 

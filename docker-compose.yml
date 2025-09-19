@@ -19,13 +19,13 @@ services:
       - "8025:8025" # Web UI
 
   jaeger:
-    image: jaegertracing/all-in-one:1.6.0
+    image: jaegertracing/all-in-one:latest
     restart: always
     environment:
-      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+      COLLECTOR_ZIPKIN_HOST_PORT: :9411
     ports:
       - "16686:16686" # Web UI
-      - "6831:6831/udp"
+      - "4318:4318" # Exporter
 
   app:
     build:
@@ -55,7 +55,7 @@ services:
       MAIL_USERNAME: ''
       MAIL_PASSWORD: ''
       JAEGER_HOST: jaeger
-      JAEGER_PORT: 6831
+      JAEGER_PORT: 4318
       JAEGER_SERVICE_NAME: amartha-test
 
     depends_on:

@@ -33,7 +33,7 @@ The project is built with Go and utilizes several key libraries:
 -   **`gorm.io/gorm`**: ORM (Object-Relational Mapper) for database interactions.
 -   **`gorm.io/driver/postgres`**: PostgreSQL driver for GORM.
 -   **`github.com/spf13/viper`**: For configuration management.
--   **`github.com/uber/jaeger-client-go`**: For distributed tracing with Jaeger.
+-   **`go.opentelemetry.io/otel`**: For distributed tracing with Jaeger.
 -   **`gopkg.in/gomail.v2`**: For sending emails.
 -   **`github.com/Masterminds/squirrel`**: SQL query builder.
 -   **`github.com/google/uuid`**: For generating UUIDs.

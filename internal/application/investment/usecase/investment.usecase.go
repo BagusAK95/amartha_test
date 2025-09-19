@@ -13,9 +13,12 @@ import (
 	"github.com/BagusAK95/amarta_test/internal/infrastructure/bus"
 	httpError "github.com/BagusAK95/amarta_test/internal/utils/error"
 	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel"
 	"gorm.io/gorm"
 )
+
+var tracerName = "InvestmentUsecase"
+var tracer = otel.Tracer(tracerName)
 
 type investmentUsecase struct {
 	investmentRepo investment.IInvestmentRepository
@@ -36,8 +39,8 @@ func NewInvestmentUsecase(investmentRepo investment.IInvestmentRepository, inves
 }
 
 func (u *investmentUsecase) AddInvestment(ctx context.Context, investorID uuid.UUID, req investment.CreateInvestmentRequest) (res *investment.Investment, err error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "investmentUsecase.AddInvestment")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".AddInvestment")
+	defer span.End()
 
 	ctx, cancel := context.WithTimeout(ctx, config.CONTEXT_TIMEOUT)
 	defer cancel()
@@ -123,6 +126,9 @@ func (u *investmentUsecase) AddInvestment(ctx context.Context, investorID uuid.U
 }
 
 func (u *investmentUsecase) checkLoanInvested(ctx context.Context, validLoan loan.Loan, lastInvestment float64, trx *gorm.DB) (err error) {
+	ctx, span := tracer.Start(ctx, tracerName+".CheckLoanInvested")
+	defer span.End()
+
 	if lastInvestment != validLoan.PrincipalAmount {
 		return
 	}
@@ -159,8 +165,8 @@ func (u *investmentUsecase) checkLoanInvested(ctx context.Context, validLoan loa
 }
 
 func (u *investmentUsecase) GetInvestmentAgreementDetail(ctx context.Context, investmentID uuid.UUID) (*investment.InvestmentAgreementResponse, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "investmentUsecase.GetInvestmentAgreementDetail")
-	defer span.Finish()
+	ctx, span := tracer.Start(ctx, tracerName+".GetInvestmentAgreementDetail")
+	defer span.End()
 
 	inv, err := u.investmentRepo.GetByID(ctx, investmentID)
 	if err != nil {
