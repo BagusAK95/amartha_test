@@ -105,7 +105,7 @@ Detailed API documentation can be found on Postman: [https://documenter.getpostm
 
 3.  **Access the application and tools:**
     -   The API server will be accessible at `http://localhost:8081`.
-    -   Mailhog web UI: `http://localhost:8025`
+    -   Smtp4dev web UI: `http://localhost:80`
     -   Jaeger web UI: `http://localhost:16686`
 
 4.  **Stop the services:**
