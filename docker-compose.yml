@@ -52,7 +52,7 @@ services:
       POSTGRES_DATABASE: amartha_test_db
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
-      MAIL_USERNAME: ''
+      MAIL_USERNAME: no-reply@amartha.com
       MAIL_PASSWORD: ''
       MAIL_TLS: false
       JAEGER_HOST: jaeger
