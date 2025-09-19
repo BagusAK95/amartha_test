@@ -2,6 +2,7 @@ package mail
 
 import (
 	"bytes"
+	"crypto/tls"
 
 	"github.com/BagusAK95/amarta_test/internal/config"
 	"github.com/BagusAK95/amarta_test/internal/utils/html"
@@ -17,6 +18,7 @@ type Sender struct {
 	Port     int
 	Username string
 	Password string
+	TLS      bool
 }
 
 func NewSender(cfg config.MailConfig) ISender {
@@ -25,6 +27,7 @@ func NewSender(cfg config.MailConfig) ISender {
 		Port:     cfg.Port,
 		Username: cfg.Username,
 		Password: cfg.Password,
+		TLS:      cfg.TLS,
 	}
 }
 
@@ -49,6 +52,11 @@ func (s *Sender) SendEmailWithTemplate(to, subject, file string, data any) error
 
 	// Create a new dialer
 	d := gomail.NewDialer(s.Host, s.Port, s.Username, s.Password)
+
+	// Set TLS configuration if enabled
+	if s.TLS {
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	}
 
 	// Send the email
 	if err := d.DialAndSend(m); err != nil {

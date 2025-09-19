@@ -11,12 +11,12 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
-  mailhog:
-    image: mailhog/mailhog:latest
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
     restart: always
     ports:
-      - "1025:1025" # SMTP server
-      - "8025:8025" # Web UI
+      - "25:25"   # SMTP server
+      - "80:80"   # Web UI
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -50,17 +50,18 @@ services:
       POSTGRES_SLAVE_PORT: 5432
       POSTGRES_SLAVE_SSL_MODE: disable
       POSTGRES_DATABASE: amartha_test_db
-      MAIL_HOST: mailhog
-      MAIL_PORT: 1025
+      MAIL_HOST: smtp4dev
+      MAIL_PORT: 25
       MAIL_USERNAME: ''
       MAIL_PASSWORD: ''
+      MAIL_TLS: false
       JAEGER_HOST: jaeger
       JAEGER_PORT: 4318
       JAEGER_SERVICE_NAME: amartha-test
 
     depends_on:
       - db
-      - mailhog
+      - smtp4dev
       - jaeger
 
 volumes:

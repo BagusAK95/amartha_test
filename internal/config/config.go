@@ -47,6 +47,7 @@ type MailConfig struct {
 	Port     int    `mapstructure:"MAIL_PORT"`
 	Username string `mapstructure:"MAIL_USERNAME"`
 	Password string `mapstructure:"MAIL_PASSWORD"`
+	TLS      bool   `mapstructure:"MAIL_TLS"`
 }
 
 type JaegerConfig struct {
