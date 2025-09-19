@@ -28,13 +28,15 @@ func TracingMiddleware(tracer trace.Tracer) gin.HandlerFunc {
 			status := c.Writer.Status()
 			span.SetAttributes(attribute.Int("http.status_code", status))
 
-			err := c.Errors.Last().Err
-			if status >= 500 && status <= 599 {
-				span.SetStatus(codes.Error, err.Error())
-			}
+			if len(c.Errors) > 0 {
+				err := c.Errors.Last().Err
+				if status >= 500 && status <= 599 {
+					span.SetStatus(codes.Error, err.Error())
+				}
 
-			if status >= 400 && status <= 599 && len(c.Errors) > 0 {
-				span.RecordError(err)
+				if status >= 400 && status <= 599 {
+					span.RecordError(err)
+				}
 			}
 		}()
 
